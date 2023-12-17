@@ -1,0 +1,58 @@
+INFO:root:Send to 192.168.1.5:15600 -> JOIN kareem 1
+INFO:root:Send to 192.168.1.5:15600 -> JOIN Kareem 1
+INFO:root:Send to 192.168.1.5:15600 -> JOIN kareem 1
+INFO:root:Send to 192.168.1.5:15600 -> JOIN \u0646 1
+INFO:root:Send to 192.168.1.5:15600 -> JOIN kareem 1
+INFO:root:Send to 192.168.1.5:15600 -> JOIN kareem 1
+INFO:root:Received from 192.168.1.5 -> join-success
+INFO:root:Send to 192.168.1.5:15600 -> LOGIN kareem 2 1
+INFO:root:Received from 192.168.1.5 -> login-wrong-password
+INFO:root:Send to 192.168.1.4:15600 -> JOIN Kareem 92de48cba169d129b103f3b793770e372bad96a28f02bfb46529e5a4bff80205
+INFO:root:Received from 192.168.1.4 -> join-success
+INFO:root:Send to 192.168.1.4:15600 -> LOGIN Kareem 92de48cba169d129b103f3b793770e372bad96a28f02bfb46529e5a4bff80205 4827
+INFO:root:Received from 192.168.1.4 -> login-success
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
