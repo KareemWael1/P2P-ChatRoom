@@ -1,3 +1,8 @@
+'''
+    ##  Implementation of registry
+    ##  150114822 - Eren Ulaş
+'''
+
 from socket import *
 import threading
 import select
@@ -12,6 +17,7 @@ class ClientThread(threading.Thread):
     def __init__(self, ip, port, tcpClientSocket):
         threading.Thread.__init__(self)
         # ip of the connected peer
+
         self.ip = ip
         # port number of the connected peer
         self.port = port
@@ -21,14 +27,13 @@ class ClientThread(threading.Thread):
         self.username = None
         self.isOnline = True
         self.udpServer = None
-        self.lock = None
         print("New thread started for " + ip + ":" + str(port))
 
     # main of the thread
     def run(self):
         # locks for thread which will be used for thread synchronization
         self.lock = threading.Lock()
-        print("Connection from: " + self.ip + ":" + str(portTCP))
+        print("Connection from: " + self.ip + ":" + str(port))
         print("IP Connected: " + self.ip)
 
         while True:
@@ -37,11 +42,11 @@ class ClientThread(threading.Thread):
                 message = self.tcpClientSocket.recv(1024).decode().split()
                 logging.info("Received from " + self.ip + ":" + str(self.port) + " -> " + " ".join(message))
                 #   JOIN    #
-                if message[0] == "JOIN":
+                if message[0] == "REGISTER":
                     # join-exist is sent to peer,
                     # if an account with this username already exists
                     if db.is_account_exist(message[1]):
-                        response = "join-exist"
+                        response = "REGISTER <EXIST> <300>"
                         print("From-> " + self.ip + ":" + str(self.port) + " " + response)
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
@@ -49,7 +54,7 @@ class ClientThread(threading.Thread):
                     # if an account with this username is not exist, and the account is created
                     else:
                         db.register(message[1], message[2])
-                        response = "join-success"
+                        response = "REGISTER <SUCCESS> <200>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
                 #   LOGIN    #
@@ -57,23 +62,23 @@ class ClientThread(threading.Thread):
                     # login-account-not-exist is sent to peer,
                     # if an account with the username does not exist
                     if not db.is_account_exist(message[1]):
-                        response = "login-account-not-exist"
+                        response = "AUTH <FAILURE> <404>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
                     # login-online is sent to peer,
                     # if an account with the username already online
                     elif db.is_account_online(message[1]):
-                        response = "login-online"
+                        response = "AUTH <ONLINE> <300>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
                     # login-success is sent to peer,
                     # if an account with the username exists and not online
                     else:
                         # retrieves the account's password, and checks if the one entered by the user is correct
-                        retrieved_pass = db.get_password(message[1])
+                        retrievedPass = db.get_password(message[1])
                         # if password is correct, then peer's thread is added to threads list
                         # peer is added to db with its username, port number, and ip address
-                        if retrieved_pass == message[2]:
+                        if retrievedPass == message[2]:
                             self.username = message[1]
                             self.lock.acquire()
                             try:
@@ -81,11 +86,11 @@ class ClientThread(threading.Thread):
                             finally:
                                 self.lock.release()
 
-                            db.user_login(message[1], self.ip, message[3])
+                            db.user_login(message[1], self.ip, self.port)
                             # login-success is sent to peer,
-                            # and a UDP server thread is created for this peer, and thread is started
+                            # and a udp server thread is created for this peer, and thread is started
                             # timer thread of the udp server is started
-                            response = "login-success"
+                            response = "AUTH <SUCCESS> <200>"
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
                             self.udpServer = UDPServer(self.username, self.tcpClientSocket)
@@ -93,7 +98,7 @@ class ClientThread(threading.Thread):
                             self.udpServer.timer.start()
                         # if password not matches and then login-wrong-password response is sent
                         else:
-                            response = "login-wrong-password"
+                            response = "AUTH <FAILURE> <404>"
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
                 #   LOGOUT  #
@@ -103,12 +108,12 @@ class ClientThread(threading.Thread):
                     # and removes the thread for this user from tcpThreads
                     # socket is closed and timer thread of the udp for this
                     # user is cancelled
-                    if len(message) > 1 and message[1] is not None and db.is_account_online(message[1]):
+                    if db.is_account_online(self.username):
                         db.user_logout(message[1])
                         self.lock.acquire()
                         try:
-                            if message[1] in tcpThreads:
-                                del tcpThreads[message[1]]
+                            if self.username in tcpThreads:
+                                del tcpThreads[self.username]
                         finally:
                             self.lock.release()
                         print(self.ip + ":" + str(self.port) + " is logged out")
@@ -119,29 +124,55 @@ class ClientThread(threading.Thread):
                         self.tcpClientSocket.close()
                         break
                 #   SEARCH  #
-                elif message[0] == "SEARCH":
+                elif message[0] == "SEARCH_USER":
                     # checks if an account with the username exists
                     if db.is_account_exist(message[1]):
                         # checks if the account is online
                         # and sends the related response to peer
                         if db.is_account_online(message[1]):
                             peer_info = db.get_peer_ip_port(message[1])
-                            response = "search-success " + peer_info[0] + ":" + peer_info[1]
+                            response = "SEARCH_USER_RESPONSE <SUCCESS> <200> " + str(peer_info[0]) + ":" + str(peer_info[1])
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
                         else:
-                            response = "search-user-not-online"
+                            response = "SEARCH_USER_RESPONSE <NOT_ONLINE> <300>"
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
-                    # enters if username does not exist 
+                    # enters if username does not exist
                     else:
-                        response = "search-user-not-found"
+                        response = "SEARCH_USER_RESPONSE <NOT_FOUND> <404>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
+               #online peers discovery
+                elif message[0] == "DISCOVER_PEERS":
+                    peer_list = db.get_online_peer_list()
+                    if peer_list:
+                        #detailed list
+                        if message[1] =="DETAILED":
+                            response = "PEER_LIST <SUCCESS> <200> + " + ', '.join(
+                                f"{peer['username']} ({peer['ip']}:{peer['port']})" for peer in peer_list
+                            )
+
+                            logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                            self.tcpClientSocket.send(response.encode())
+                        #partial list
+                        else:
+                            usernames = [peer['username'] for peer in peer_list]
+                            response = "PEER_LIST <SUCCESS> <200> + " + ', '.join(usernames)
+                            logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                            self.tcpClientSocket.send(response.encode())
+                    #failure empty list
+                    else :
+                        response = "PEER_LIST <FAILURE> <404>"
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
+
+
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))
+                db.user_logout(self.username)
 
-                # function for resetting the timeout for the udp timer thread
+                # function for resettin the timeout for the udp timer thread
 
     def resetTimeout(self):
         self.udpServer.resetTimer()
@@ -154,14 +185,18 @@ class UDPServer(threading.Thread):
     def __init__(self, username, clientSocket):
         threading.Thread.__init__(self)
         self.username = username
+        self.default_timeout = 3
         # timer thread for the udp server is initialized
-        self.timer = threading.Timer(3, self.waitHelloMessage)
+        self.timer = threading.Timer(self.default_timeout, self.waitKeepAliveMessage)
         self.tcpClientSocket = clientSocket
 
     # if hello message is not received before timeout
     # then peer is disconnected
-    def waitHelloMessage(self):
+    def waitKeepAliveMessage(self):
+
         if self.username is not None:
+            notification = "TIMEOUT " + self.username
+            self.tcpClientSocket.send(notification.encode())
             db.user_logout(self.username)
             if self.username in tcpThreads:
                 del tcpThreads[self.username]
@@ -169,24 +204,24 @@ class UDPServer(threading.Thread):
         print("Removed " + self.username + " from online peers")
 
     # resets the timer for udp server
-    def resetTimer(self):
+    def resetTimer(self ):
         self.timer.cancel()
-        self.timer = threading.Timer(3, self.waitHelloMessage)
+        self.timer = threading.Timer(self.default_timeout, self.waitKeepAliveMessage)
         self.timer.start()
 
 
 # tcp and udp server port initializations
-print("Registry started...")
-portTCP = 15600
+print("Registy started...")
+port = 15600
 portUDP = 15500
 
 # db initialization
 db = db.DB()
 
 # gets the ip address of this peer
-# first checks to get it for Windows devices
+# first checks to get it for windows devices
 # if the device that runs this application is not windows
-# it checks to get it for macOS devices
+# it checks to get it for macos devices
 hostname = gethostname()
 try:
     host = gethostbyname(hostname)
@@ -196,7 +231,7 @@ except gaierror:
     host = ni.ifaddresses('en0')[ni.AF_INET][0]['addr']
 
 print("Registry IP address: " + host)
-print("Registry port number: " + str(portTCP))
+print("Registry port number: " + str(port))
 
 # onlinePeers list for online account
 onlinePeers = {}
@@ -208,7 +243,7 @@ tcpThreads = {}
 # tcp and udp socket initializations
 tcpSocket = socket(AF_INET, SOCK_STREAM)
 udpSocket = socket(AF_INET, SOCK_DGRAM)
-tcpSocket.bind((host, portTCP))
+tcpSocket.bind((host, port))
 udpSocket.bind((host, portUDP))
 tcpSocket.listen(5)
 
@@ -216,7 +251,7 @@ tcpSocket.listen(5)
 inputs = [tcpSocket, udpSocket]
 
 # log file initialization
-logging.basicConfig(filename="logs/registry.log", level=logging.INFO)
+logging.basicConfig(filename="registry.log", level=logging.INFO)
 
 # as long as at least a socket exists to listen registry runs
 while inputs:
@@ -228,26 +263,27 @@ while inputs:
         # if the message received comes to the tcp socket
         # the connection is accepted and a thread is created for it, and that thread is started
         if s is tcpSocket:
-            tcp_client_socket, addr = tcpSocket.accept()
-            newThread = ClientThread(addr[0], addr[1], tcp_client_socket)
+            tcpClientSocket, addr = tcpSocket.accept()
+            response = "HELLO_BACK " + "SUCCESS " + "200 "
+            tcpClientSocket.send(response.encode())
+            newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
             newThread.start()
         # if the message received comes to the udp socket
         elif s is udpSocket:
             # received the incoming udp message and parses it
-            udp_message, clientAddress = s.recvfrom(1024)
-            udp_message = udp_message.decode().split()
+            message, clientAddress = s.recvfrom(1024)
+            message = message.decode().split()
             # checks if it is a hello message
-            if udp_message[0] == "HELLO":
-                # checks if the account that this hello message 
+            if message[0] == "KEEP_ALIVE":
+                # checks if the account that this hello message
                 # is sent from is online
-                if udp_message[1] in tcpThreads:
+                if message[1] in tcpThreads:
                     # resets the timeout for that peer since the hello message is received
-                    tcpThreads[udp_message[1]].resetTimeout()
-                    print("Hello is received from " + udp_message[1])
+                    tcpThreads[message[1]].resetTimeout()
+                    print("KEEP_ALIVE is received from " + message[1])
                     logging.info(
-                        "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) +
-                        " -> " + " ".join(udp_message)
-                    )
+                        "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
 
 # registry tcp socket is closed
 tcpSocket.close()
+
