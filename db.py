@@ -6,7 +6,7 @@ class DB:
 
     # db initializations
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:27017')
+        self.client = MongoClient('mongodb://localhost:27017/')
         self.db = self.client['p2p-chat']
 
     # checks if an account with the username exists
@@ -21,17 +21,11 @@ class DB:
             return True
         else:
             return False
-
-        # if self.db.accounts.find({'username': username}).count() > 0:
-        #     return True
-        # else:
-        #     return False
-
     # registers a user
     def register(self, username, password):
         account = {
             "username": username,
-            "password": password,
+            "password": password
         }
         self.db.accounts.insert_one(account)
 
@@ -41,10 +35,9 @@ class DB:
 
     # checks if an account with the username online
     def is_account_online(self, username):
-        if self.db.online_peers.count_documents({'username': username}) > 0:
-            return True
-        else:
-            return False
+        count = self.db.online_peers.count_documents({'username': username})
+        return count > 0
+
 
     # logs in the user
     def user_login(self, username, ip, port):
@@ -53,15 +46,19 @@ class DB:
             "ip": ip,
             "port": port
         }
-        # self.db.online_peers.insert(online_peer)
         self.db.online_peers.insert_one(online_peer)
 
     # logs out the user
     def user_logout(self, username):
-        # self.db.online_peers.remove({"username": username})
         self.db.online_peers.delete_one({"username": username})
 
     # retrieves the ip address and the port number of the username
     def get_peer_ip_port(self, username):
         res = self.db.online_peers.find_one({"username": username})
         return (res["ip"], res["port"])
+
+    def get_online_peer_list(self):
+        online_peers_cursor = self.db.online_peers.find()
+        online_peers_list = list(online_peers_cursor)
+        return online_peers_list
+
