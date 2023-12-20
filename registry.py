@@ -170,6 +170,9 @@ class ClientThread(threading.Thread):
 
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))
+                response = "HELLO_BACK " + "FAILURE " + "404"
+                logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
                 db.user_logout(self.username)
 
                 # function for resettin the timeout for the udp timer thread
@@ -265,6 +268,7 @@ while inputs:
         if s is tcpSocket:
             tcpClientSocket, addr = tcpSocket.accept()
             response = "HELLO_BACK " + "SUCCESS " + "200 "
+            logging.info("Send to " + addr[0] + ":" + str(addr[1]) + " -> " + response)
             tcpClientSocket.send(response.encode())
             newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
             newThread.start()
@@ -281,8 +285,13 @@ while inputs:
                     # resets the timeout for that peer since the hello message is received
                     tcpThreads[message[1]].resetTimeout()
                     print("KEEP_ALIVE is received from " + message[1])
+                    loggingmessage = "KEEP_ALIVE <SUCCESS> <200>"
+
+
+
                     logging.info(
                         "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
+                    # Send the response back to the UDP client
 
 # registry tcp socket is closed
 tcpSocket.close()

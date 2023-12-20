@@ -67,7 +67,7 @@ class PeerServer(threading.Thread):
                 readable, writable, exceptional = select.select(inputs, [], [])
                 # If a server waits to be connected enters here
                 for s in readable:
-                    # if the socket that is receiving the connection is 
+                    # if the socket that is receiving the connection is
                     # the tcp socket of the peer's server, enters here
                     if s is self.tcpServerSocket:
                         # accepts the connection, and adds its connection socket to the inputs list
@@ -111,7 +111,7 @@ class PeerServer(threading.Thread):
                             # chatting with and if the user is already chatting with someone else(isChatRequested =
                             # 1), then enters here
                             elif s is not self.connectedPeerSocket and self.isChatRequested == 1:
-                                # sends a busy message to the peer that sends a chat request when this peer is 
+                                # sends a busy message to the peer that sends a chat request when this peer is
                                 # already chatting with someone else
                                 message = "BUSY"
                                 s.send(message.encode())
@@ -126,7 +126,7 @@ class PeerServer(threading.Thread):
                         elif message_received == "<REJECT>":
                             self.isChatRequested = 0
                             inputs.remove(s)
-                        # if a message is received, and if this is not a quit message ':q' and 
+                        # if a message is received, and if this is not a quit message ':q' and
                         # if it is not an empty message, show this message to the user
                         elif message_received[:2] != ":q" and len(message_received) != 0:
                             print(self.chattingClientName + ": " + message_received)
@@ -285,7 +285,9 @@ class peerMain:
         self.registryPort = 15600
         # tcp socket connection to registry
         self.tcpClientSocket = socket(AF_INET, SOCK_STREAM)
+
         self.tcpClientSocket.connect((self.registryName, self.registryPort))
+        self.connectServer()
         # initializes udp socket which is used to send hello messages
         self.udpClientSocket = socket(AF_INET, SOCK_DGRAM)
         # udp port of the registry
@@ -335,7 +337,7 @@ class peerMain:
                     self.peerServer = PeerServer(self.loginCredentials[0], self.peerServerPort)
                     self.peerServer.start()
                     # hello message is sent to registry
-                    self.sendHelloMessage()
+                    self.sendKeepAliveMessage(self.loginCredentials[0])
             # if choice is 3 and user is logged in, then user is logged out
             # and peer variables are set, and server and client sockets are closed
             elif choice == "3" and self.isOnline:
@@ -354,7 +356,7 @@ class peerMain:
             # for a username that is wanted to be searched
             elif choice == "4" and self.isOnline:
                 username = input("Username to be searched: ")
-                search_status = self.searchUser(username)
+                search_status = self.search_user(username)
                 # if user is found its ip address is shown to user
                 if search_status is not None and search_status != 0:
                     print("IP address of " + username + " is " + search_status)
@@ -407,22 +409,20 @@ class peerMain:
         message = "REGISTER " + username + " " + utility.hash_password(password)
         response = self.send_credentials(message)
         # Process the response from the registry
-       
-        if response ==  "REGISTER <SUCCESS> <200>":
+
+        if response[2] == "<200>":
             print("Account created successfully.")
-        elif response == "REGISTER <EXIST> <300>":
+        elif response[2] == "<300>":
             print("Username already exists. Choose another username or login.")
-        elif response =="REGISTER <FAILURE> <404>":
+        elif response[2] == "<404>":
             print("Failed to create an account. Please try again.")
-               
-  
 
     def send_credentials(self, message):
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
-        return response
+        return response.split()
 
     # login function
     def login(self, username, password, peerServerPort):
@@ -430,19 +430,18 @@ class peerMain:
         # an integer is returned according to each response
         message = "LOGIN " + username + " " + utility.hash_password(password) + " " + str(peerServerPort)
         response = self.send_credentials(message)
-        if response == " AUTH <SUCCESS> <200>":
+        if response[2] == "<200>":
             print("Logged in successfully...")
             return 1
-        elif response == " AUTH <ONLINE> <300>":
+        elif response[2] == "<300>":
             print("Account is already online...")
             return 2
-        elif response == " AUTH <FAILURE> <404>":
+        elif response[2] == "<404>":
             print("Wrong password...")
             return 3
         # elif response == "login-account-not-exist":
         #    print("Account does not exist...")
         #   return 0
-
 
     # logout function
     def logout(self, option):
@@ -457,54 +456,47 @@ class peerMain:
         self.tcpClientSocket.send(message.encode())
 
     # function for searching an online user
-    def searchUser(self, username):
+    def search_user(self, username):
         # a search message is composed and sent to registry
         # custom value is returned according to each response
         # to this search message
-        message = "SEARCH " + username
+        message = "SEARCH_USER " + username
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
-        if response[0] == "SEARCH_USER_RESPONSE <SUCCESS> <200>":
+        if response[2] == "<200>":
             print(username + " is found successfully...")
-            return response[1]
-        elif response[0] == "SEARCH_USER_RESPONSE <NOT_ONLINE> <300>":
+            return response[3]
+        elif response[2] == "<300>":
             print(username + " is not online...")
             return 0
-        elif response[0] == "SEARCH_USER_RESPONSE <NOT_FOUND> <404>":
+        elif response[2] == "<404>":
             print(username + " is not found")
             return None
-        
-#online peers discovery?
+
+    # online peers discovery?
 
     # function for sending hello message
     # a timer thread is used to send hello messages to udp socket of registry
-    def sendHelloMessage(self):
-        message = "HELLO_P2P"
+    def sendKeepAliveMessage(self , username):
+        message = "KEEP_ALIVE " + username
         logging.info("Send to " + self.registryName + ":" + str(self.registryUDPPort) + " -> " + message)
         self.udpClientSocket.sendto(message.encode(), (self.registryName, self.registryUDPPort))
 
         # Assuming you expect a response from the registry
-        response, _ = self.udpClientSocket.recvfrom(1024)
-        response_parts = response.decode().split()
-
-        if response_parts[0] == "HELLO_BACK":
-            status = response_parts[1]
-            status_code = int(response_parts[2])
-
-            if status == "SUCCESS" and status_code == 200:
-                print("Registry confirmed successful connection.")
-            elif status == "FAILURE" and status_code == 404:
-                print("Registry failed to confirm connection.")
-            else:
-                print("Unexpected response from the registry.")
-        else:
-            print("Unexpected response format from the registry.")
 
         # Schedule the next hello message
-        self.timer = threading.Timer(1, self.sendHelloMessage)
+        self.timer = threading.Timer(1, self.sendKeepAliveMessage, args=[username])
         self.timer.start()
-
+    def connectServer(self):
+        startingMessage = "HELLO_P2P"
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + startingMessage)
+        self.tcpClientSocket.send(startingMessage.encode())
+        response = self.tcpClientSocket.recv(1024).decode().split()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        status_code = int(response[2])
+        if status_code == 200:
+            print("Connected to the registery...")
 # peer is started
 main = peerMain()
