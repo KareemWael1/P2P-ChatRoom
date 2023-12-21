@@ -259,7 +259,7 @@ tcpSocket = socket(AF_INET, SOCK_STREAM)
 udpSocket = socket(AF_INET, SOCK_DGRAM)
 tcpSocket.bind((host, port))
 udpSocket.bind((host, portUDP))
-tcpSocket.listen(5)
+tcpSocket.listen(1000)
 
 # input sockets that are listened
 inputs = [tcpSocket, udpSocket]
