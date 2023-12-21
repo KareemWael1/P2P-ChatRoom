@@ -219,14 +219,17 @@ class peerClient:
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         if response[2] == "<200>":
             response = response[3:]
+            number = 1
             if option == "DETAILED":
                 print(Fore.RESET + "#  Username".ljust(18) + "(IP:Port)")
                 for i in range(0, len(response), 2):
-                    print(Fore.GREEN + f"{i+1}  {response[i]:15}{response[i+1]}")
+                    print(Fore.GREEN + f"{number}  {response[i]:15}{response[i+1]}")
+                    number += 1
             else:
                 print(Fore.RESET + "Username")
                 for username in response:
-                    print(Fore.GREEN + username)
+                    print(Fore.GREEN + str(number) + "  " + username)
+                    number += 1
             time.sleep(1)
         elif response[2] == "<404>":
             print(Fore.YELLOW + "No Online Users right now, please check back later")
