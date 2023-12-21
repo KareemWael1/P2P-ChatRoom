@@ -1,9 +1,8 @@
 import logging
 import threading
 from socket import *
-
-import select
 import ssl
+import select
 import utility
 
 
@@ -17,9 +16,6 @@ class PeerServer(threading.Thread):
         self.username = username
         # tcp socket for peer server
         self.tcpServerSocket = socket(AF_INET, SOCK_STREAM)
-        # Create SSL context
-        self.context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        self.context.load_cert_chain(certfile="security/server.crt", keyfile="security/server.key")
         # port number of the peer server
         self.peerServerPort = peerServerPort
         # if 1, then user is already chatting with someone
@@ -73,7 +69,6 @@ class PeerServer(threading.Thread):
                         # accepts the connection, and adds its connection socket to the inputs list
                         # so that we can monitor that socket as well
                         connected, addr = s.accept()
-                        s = self.context.wrap_socket(connected, server_side=True)
                         connected.setblocking(0)
                         inputs.append(connected)
                         # if the user is not chatting, then the ip and the socket of
@@ -285,7 +280,13 @@ class peerMain:
         self.registryPort = 15600
         # tcp socket connection to registry
         self.tcpClientSocket = socket(AF_INET, SOCK_STREAM)
-
+        # Create an SSL context
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        # Wrap the socket with SSL
+        self.tcpClientSocket = context.wrap_socket(self.tcpClientSocket, server_hostname=self.registryName)
+        # Connect to the server
         self.tcpClientSocket.connect((self.registryName, self.registryPort))
         self.connectServer()
         # initializes udp socket which is used to send hello messages
@@ -364,7 +365,7 @@ class peerMain:
             # to enter the username of the user that is wanted to be chatted
             elif choice == "5" and self.isOnline:
                 username = input("Enter the username of user to start chat: ")
-                search_status = self.searchUser(username)
+                search_status = self.search_user(username)
                 # if searched user is found, then its ip address and port number is retrieved
                 # and a client thread is created
                 # main process waits for the client thread to finish its chat
@@ -479,7 +480,7 @@ class peerMain:
 
     # function for sending hello message
     # a timer thread is used to send hello messages to udp socket of registry
-    def sendKeepAliveMessage(self , username):
+    def sendKeepAliveMessage(self, username):
         message = "KEEP_ALIVE " + username
         logging.info("Send to " + self.registryName + ":" + str(self.registryUDPPort) + " -> " + message)
         self.udpClientSocket.sendto(message.encode(), (self.registryName, self.registryUDPPort))
@@ -489,14 +490,17 @@ class peerMain:
         # Schedule the next hello message
         self.timer = threading.Timer(1, self.sendKeepAliveMessage, args=[username])
         self.timer.start()
+
     def connectServer(self):
-        startingMessage = "HELLO_P2P"
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + startingMessage)
-        self.tcpClientSocket.send(startingMessage.encode())
+        starting_message = "HELLO_P2P"
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + starting_message)
+        self.tcpClientSocket.send(starting_message.encode())
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         status_code = int(response[2])
         if status_code == 200:
-            print("Connected to the registery...")
+            print("Connected to the registry...")
+
+
 # peer is started
 main = peerMain()

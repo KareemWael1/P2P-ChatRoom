@@ -56,3 +56,27 @@ INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
 INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
 INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
 INFO:root:Send to 192.168.1.4:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15600 -> LOGIN Kareem 92de48cba169d129b103f3b793770e372bad96a28f02bfb46529e5a4bff80205 4297
+INFO:root:Received from 192.168.1.7 -> login-success
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15500 -> HELLO Kareem
+INFO:root:Send to 192.168.1.7:15600 -> LOGOUT Kareem
+ERROR:root:OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:root:Send to 192.168.1.7:15600 -> LOGIN Kareem a9f180e80228f26b0f9f231ab9f1d454c6e8d235b0855390683a5ac687ec65de 3589
+INFO:root:Received from 192.168.1.7 -> login-wrong-password
+INFO:root:Send to 172.20.10.6:15600 -> JOIN Kimo e604fb2072c286d1fb6378c5cde74ca0c99f3ba1d9f4cef58969020efbc2382e
+INFO:root:Received from 172.20.10.6 -> HELLO_BACK SUCCESS 200 
+INFO:root:Send to 172.20.10.6:15600 -> LOGIN Kimo e604fb2072c286d1fb6378c5cde74ca0c99f3ba1d9f4cef58969020efbc2382e 48
+INFO:root:Received from 172.20.10.6 -> AUTH <FAILURE> <404>
+INFO:root:Send to 172.20.10.6:15600 -> LOGIN k 043a718774c572bd8a25adbeb1bfcd5c0256ae11cecf9f9c3f925d0e52beaf89 3
+INFO:root:Received from 172.20.10.6 -> AUTH <FAILURE> <404>
+INFO:root:Send to 172.20.10.6:15600 -> LOGOUT
+INFO:root:Send to 172.20.10.6:15600 -> LOGIN g cd0aa9856147b6c5b4ff2b7dfee5da20aa38253099ef1b4a64aced233c9afe29 6735
+INFO:root:Received from 172.20.10.6 -> HELLO_BACK SUCCESS 200 
+INFO:root:Send to 192.168.1.5:15600 -> REGISTER Kimo 11add892f9c0c2a172f5700b5915ea6abb57e9adcd3d8c10aa98d4d211e4c28a
+INFO:root:Received from 192.168.1.5 -> HELLO_BACK SUCCESS 200 

@@ -8,6 +8,7 @@ import threading
 import select
 import logging
 import db
+import ssl
 
 
 # This class is used to process the peer messages sent to registry
@@ -23,6 +24,9 @@ class ClientThread(threading.Thread):
         self.port = port
         # socket of the peer
         self.tcpClientSocket = tcpClientSocket
+        # Create SSL context
+        self.context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        self.context.load_cert_chain(certfile="security/server.crt", keyfile="security/server.key")
         # username, online status and udp server initializations
         self.username = None
         self.isOnline = True
@@ -131,7 +135,8 @@ class ClientThread(threading.Thread):
                         # and sends the related response to peer
                         if db.is_account_online(message[1]):
                             peer_info = db.get_peer_ip_port(message[1])
-                            response = "SEARCH_USER_RESPONSE <SUCCESS> <200> " + str(peer_info[0]) + ":" + str(peer_info[1])
+                            response = "SEARCH_USER_RESPONSE <SUCCESS> <200> " + str(peer_info[0]) + ":" + str(
+                                peer_info[1])
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
                         else:
@@ -143,26 +148,26 @@ class ClientThread(threading.Thread):
                         response = "SEARCH_USER_RESPONSE <NOT_FOUND> <404>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
-               #online peers discovery
+                # online peers discovery
                 elif message[0] == "DISCOVER_PEERS":
                     peer_list = db.get_online_peer_list()
                     if peer_list:
-                        #detailed list
-                        if message[1] =="DETAILED":
+                        # detailed list
+                        if message[1] == "DETAILED":
                             response = "PEER_LIST <SUCCESS> <200> + " + ', '.join(
                                 f"{peer['username']} ({peer['ip']}:{peer['port']})" for peer in peer_list
                             )
 
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
-                        #partial list
+                        # partial list
                         else:
                             usernames = [peer['username'] for peer in peer_list]
                             response = "PEER_LIST <SUCCESS> <200> + " + ', '.join(usernames)
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
-                    #failure empty list
-                    else :
+                    # failure empty list
+                    else:
                         response = "PEER_LIST <FAILURE> <404>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
@@ -207,7 +212,7 @@ class UDPServer(threading.Thread):
         print("Removed " + self.username + " from online peers")
 
     # resets the timer for udp server
-    def resetTimer(self ):
+    def resetTimer(self):
         self.timer.cancel()
         self.timer = threading.Timer(self.default_timeout, self.waitKeepAliveMessage)
         self.timer.start()
@@ -267,11 +272,12 @@ while inputs:
         # the connection is accepted and a thread is created for it, and that thread is started
         if s is tcpSocket:
             tcpClientSocket, addr = tcpSocket.accept()
+            newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
+            newThread.tcpClientSocket = newThread.context.wrap_socket(newThread.tcpClientSocket, server_side=True)
+            newThread.start()
             response = "HELLO_BACK " + "SUCCESS " + "200 "
             logging.info("Send to " + addr[0] + ":" + str(addr[1]) + " -> " + response)
-            tcpClientSocket.send(response.encode())
-            newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
-            newThread.start()
+            newThread.tcpClientSocket.send(response.encode())
         # if the message received comes to the udp socket
         elif s is udpSocket:
             # received the incoming udp message and parses it
@@ -287,12 +293,9 @@ while inputs:
                     print("KEEP_ALIVE is received from " + message[1])
                     loggingmessage = "KEEP_ALIVE <SUCCESS> <200>"
 
-
-
                     logging.info(
                         "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
                     # Send the response back to the UDP client
 
 # registry tcp socket is closed
 tcpSocket.close()
-
