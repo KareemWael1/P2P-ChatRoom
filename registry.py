@@ -7,6 +7,9 @@ from socket import *
 import threading
 import select
 import logging
+
+from colorama import Fore
+
 import db
 import ssl
 
@@ -37,8 +40,8 @@ class ClientThread(threading.Thread):
     def run(self):
         # locks for thread which will be used for thread synchronization
         self.lock = threading.Lock()
-        print(Back.RED + Fore.BLUE+"Connection from: " + self.ip + ":" + str(port))
-        print(Back.RED + Fore.BLUE+"IP Connected: " + self.ip)
+        print(Fore.BLUE+"Connection from: " + self.ip + ":" + str(port))
+        print(Fore.BLUE+"IP Connected: " + self.ip)
 
         while True:
             try:
@@ -107,11 +110,8 @@ class ClientThread(threading.Thread):
                             self.tcpClientSocket.send(response.encode())
                 #   LOGOUT  #
                 elif message[0] == "LOGOUT":
-                    # if user is online,
-                    # removes the user from onlinePeers list
-                    # and removes the thread for this user from tcpThreads
-                    # socket is closed and timer thread of the udp for this
-                    # user is cancelled
+                    # if user is online, removes the user from onlinePeers list and removes the thread for this user
+                    # from tcpThreads socket is closed and timer thread of the udp for this user is cancelled
                     if db.is_account_online(self.username):
                         db.user_logout(message[1])
                         self.lock.acquire()
@@ -120,13 +120,14 @@ class ClientThread(threading.Thread):
                                 del tcpThreads[self.username]
                         finally:
                             self.lock.release()
-                        print(Back.RED + Fore.BLUE+self.ip + ":" + str(self.port) + " is logged out")
+                        print(Fore.BLUE+self.ip + ":" + str(self.port) + " is logged out")
                         self.tcpClientSocket.close()
                         self.udpServer.timer.cancel()
                         break
                     else:
                         self.tcpClientSocket.close()
                         break
+
                 #   SEARCH  #
                 elif message[0] == "SEARCH_USER":
                     # checks if an account with the username exists
@@ -151,10 +152,15 @@ class ClientThread(threading.Thread):
                 # online peers discovery
                 elif message[0] == "DISCOVER_PEERS":
                     peer_list = db.get_online_peer_list()
+                    # remove the requesting user from the list
                     if peer_list:
+                        for peer in peer_list:
+                            if peer['username'] == message[2]:
+                                peer_list.remove(peer)
+                    if peer_list and len(peer_list) > 0:
                         # detailed list
                         if message[1] == "DETAILED":
-                            response = "PEER_LIST <SUCCESS> <200> + " + ', '.join(
+                            response = "PEER_LIST <SUCCESS> <200> " + ' '.join(
                                 f"{peer['username']} ({peer['ip']}:{peer['port']})" for peer in peer_list
                             )
 
@@ -163,7 +169,7 @@ class ClientThread(threading.Thread):
                         # partial list
                         else:
                             usernames = [peer['username'] for peer in peer_list]
-                            response = "PEER_LIST <SUCCESS> <200> + " + ', '.join(usernames)
+                            response = "PEER_LIST <SUCCESS> <200> " + ' '.join(usernames)
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                             self.tcpClientSocket.send(response.encode())
                     # failure empty list
@@ -209,7 +215,7 @@ class UDPServer(threading.Thread):
             if self.username in tcpThreads:
                 del tcpThreads[self.username]
         self.tcpClientSocket.close()
-        print(Back.GREEN + Fore.BLUE +"Removed " + self.username + " from online peers")
+        print(Fore.BLUE +"Removed " + self.username + " from online peers")
 
     # resets the timer for udp server
     def resetTimer(self):
@@ -219,7 +225,7 @@ class UDPServer(threading.Thread):
 
 
 # tcp and udp server port initializations
-print(Back.YELLOW +"Registy started...")
+print("Registy started...")
 port = 15600
 portUDP = 15500
 
@@ -238,8 +244,8 @@ except gaierror:
 
     host = ni.ifaddresses('en0')[ni.AF_INET][0]['addr']
 
-print(Back.YELLOW +"Registry IP address: " + host)
-print(Back.YELLOW +"Registry port number: " + str(port))
+print("Registry IP address: " + host)
+print("Registry port number: " + str(port))
 
 # onlinePeers list for online account
 onlinePeers = {}
@@ -264,7 +270,7 @@ logging.basicConfig(filename="registry.log", level=logging.INFO)
 # as long as at least a socket exists to listen registry runs
 while inputs:
 
-    print(Back.YELLOW +"Listening for incoming connections...")
+    print("Listening for incoming connections...")
     # monitors for the incoming connections
     readable, writable, exceptional = select.select(inputs, [], [])
     for s in readable:
@@ -290,7 +296,7 @@ while inputs:
                 if message[1] in tcpThreads:
                     # resets the timeout for that peer since the hello message is received
                     tcpThreads[message[1]].resetTimeout()
-                    print(Back.YELLOW +"KEEP_ALIVE is received from " + message[1])
+                    print("KEEP_ALIVE is received from " + message[1])
                     loggingmessage = "KEEP_ALIVE <SUCCESS> <200>"
 
                     logging.info(
