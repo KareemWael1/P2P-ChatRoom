@@ -37,8 +37,8 @@ class ClientThread(threading.Thread):
     def run(self):
         # locks for thread which will be used for thread synchronization
         self.lock = threading.Lock()
-        print("Connection from: " + self.ip + ":" + str(port))
-        print("IP Connected: " + self.ip)
+        print(Back.RED + Fore.BLUE+"Connection from: " + self.ip + ":" + str(port))
+        print(Back.RED + Fore.BLUE+"IP Connected: " + self.ip)
 
         while True:
             try:
@@ -120,7 +120,7 @@ class ClientThread(threading.Thread):
                                 del tcpThreads[self.username]
                         finally:
                             self.lock.release()
-                        print(self.ip + ":" + str(self.port) + " is logged out")
+                        print(Back.RED + Fore.BLUE+self.ip + ":" + str(self.port) + " is logged out")
                         self.tcpClientSocket.close()
                         self.udpServer.timer.cancel()
                         break
@@ -209,7 +209,7 @@ class UDPServer(threading.Thread):
             if self.username in tcpThreads:
                 del tcpThreads[self.username]
         self.tcpClientSocket.close()
-        print("Removed " + self.username + " from online peers")
+        print(Back.GREEN + Fore.BLUE +"Removed " + self.username + " from online peers")
 
     # resets the timer for udp server
     def resetTimer(self):
@@ -219,7 +219,7 @@ class UDPServer(threading.Thread):
 
 
 # tcp and udp server port initializations
-print("Registy started...")
+print(Back.YELLOW +"Registy started...")
 port = 15600
 portUDP = 15500
 
@@ -238,8 +238,8 @@ except gaierror:
 
     host = ni.ifaddresses('en0')[ni.AF_INET][0]['addr']
 
-print("Registry IP address: " + host)
-print("Registry port number: " + str(port))
+print(Back.YELLOW +"Registry IP address: " + host)
+print(Back.YELLOW +"Registry port number: " + str(port))
 
 # onlinePeers list for online account
 onlinePeers = {}
@@ -264,7 +264,7 @@ logging.basicConfig(filename="registry.log", level=logging.INFO)
 # as long as at least a socket exists to listen registry runs
 while inputs:
 
-    print("Listening for incoming connections...")
+    print(Back.YELLOW +"Listening for incoming connections...")
     # monitors for the incoming connections
     readable, writable, exceptional = select.select(inputs, [], [])
     for s in readable:
@@ -290,7 +290,7 @@ while inputs:
                 if message[1] in tcpThreads:
                     # resets the timeout for that peer since the hello message is received
                     tcpThreads[message[1]].resetTimeout()
-                    print("KEEP_ALIVE is received from " + message[1])
+                    print(Back.YELLOW +"KEEP_ALIVE is received from " + message[1])
                     loggingmessage = "KEEP_ALIVE <SUCCESS> <200>"
 
                     logging.info(
