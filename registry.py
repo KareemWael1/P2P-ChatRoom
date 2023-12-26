@@ -1,7 +1,7 @@
-'''
-    ##  Implementation of registry
+"""
+    ## Credits for the starting code
     ##  150114822 - Eren Ulaş
-'''
+"""
 
 from socket import *
 import threading
@@ -40,8 +40,8 @@ class ClientThread(threading.Thread):
     def run(self):
         # locks for thread which will be used for thread synchronization
         self.lock = threading.Lock()
-        print(Fore.BLUE+"Connection from: " + self.ip + ":" + str(port))
-        print(Fore.BLUE+"IP Connected: " + self.ip)
+        print(Fore.BLUE + "Connection from: " + self.ip + ":" + str(port))
+        print(Fore.BLUE + "IP Connected: " + self.ip)
 
         while True:
             try:
@@ -82,10 +82,10 @@ class ClientThread(threading.Thread):
                     # if an account with the username exists and not online
                     else:
                         # retrieves the account's password, and checks if the one entered by the user is correct
-                        retrievedPass = db.get_password(message[1])
+                        retrieved_pass = db.get_password(message[1])
                         # if password is correct, then peer's thread is added to threads list
                         # peer is added to db with its username, port number, and ip address
-                        if retrievedPass == message[2]:
+                        if retrieved_pass == message[2]:
                             self.username = message[1]
                             self.lock.acquire()
                             try:
@@ -95,7 +95,7 @@ class ClientThread(threading.Thread):
 
                             db.user_login(message[1], self.ip, self.port)
                             # login-success is sent to peer,
-                            # and a udp server thread is created for this peer, and thread is started
+                            # and a UDP server thread is created for this peer, and thread is started
                             # timer thread of the udp server is started
                             response = "AUTH <SUCCESS> <200>"
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
@@ -120,7 +120,7 @@ class ClientThread(threading.Thread):
                                 del tcpThreads[self.username]
                         finally:
                             self.lock.release()
-                        print(Fore.BLUE+self.ip + ":" + str(self.port) + " is logged out")
+                        print(Fore.BLUE + self.ip + ":" + str(self.port) + " is logged out")
                         self.tcpClientSocket.close()
                         self.udpServer.timer.cancel()
                         break
@@ -178,7 +178,6 @@ class ClientThread(threading.Thread):
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
 
-
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))
                 response = "HELLO_BACK " + "FAILURE " + "404"
@@ -186,7 +185,7 @@ class ClientThread(threading.Thread):
 
                 db.user_logout(self.username)
 
-                # function for resettin the timeout for the udp timer thread
+                # function for resetting the timeout for the udp timer thread
 
     def resetTimeout(self):
         self.udpServer.resetTimer()
@@ -215,7 +214,7 @@ class UDPServer(threading.Thread):
             if self.username in tcpThreads:
                 del tcpThreads[self.username]
         self.tcpClientSocket.close()
-        print(Fore.BLUE +"Removed " + self.username + " from online peers")
+        print(Fore.BLUE + "Removed " + self.username + " from online peers")
 
     # resets the timer for udp server
     def resetTimer(self):
@@ -225,7 +224,7 @@ class UDPServer(threading.Thread):
 
 
 # tcp and udp server port initializations
-print("Registy started...")
+print("Registry started...")
 port = 15600
 portUDP = 15500
 
@@ -233,9 +232,9 @@ portUDP = 15500
 db = db.DB()
 
 # gets the ip address of this peer
-# first checks to get it for windows devices
+# first checks to get it for Windows devices
 # if the device that runs this application is not windows
-# it checks to get it for macos devices
+# it checks to get it for macOS devices
 hostname = gethostname()
 try:
     host = gethostbyname(hostname)
@@ -265,7 +264,7 @@ tcpSocket.listen(1000)
 inputs = [tcpSocket, udpSocket]
 
 # log file initialization
-logging.basicConfig(filename="registry.log", level=logging.INFO)
+logging.basicConfig(filename="logs/registry.log", level=logging.INFO)
 
 # as long as at least a socket exists to listen registry runs
 while inputs:
@@ -297,7 +296,7 @@ while inputs:
                     # resets the timeout for that peer since the hello message is received
                     tcpThreads[message[1]].resetTimeout()
                     print("KEEP_ALIVE is received from " + message[1])
-                    loggingmessage = "KEEP_ALIVE <SUCCESS> <200>"
+                    logging_message = "KEEP_ALIVE <SUCCESS> <200>"
 
                     logging.info(
                         "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
