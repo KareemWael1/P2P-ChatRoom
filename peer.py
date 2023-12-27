@@ -314,7 +314,8 @@ class peerMain:
         self.options = {1: {1: "Signup", 2: "Login", 3: "Exit"},
                         2: {1: "Find Online Users", 2: "Search User", 3: "Start a Chat",
                             4: "Create a Chat Room", 5: "Find Chat Rooms", 6: "Join a Chat Room",
-                            7: "Logout"}}
+                            7: "Logout"},
+                        3: {1: "Send message", 2: "Leave room"}}
 
         # as long as the user is not logged out, asks to select an option in the menu
         while True:
@@ -402,7 +403,42 @@ class peerMain:
                     time.sleep(1)
 
         elif selection == "Create a Chat Room":
-            pass
+            while True:
+                name = input(Fore.MAGENTA + "Chat room name: ")
+                if name == 'quit':
+                    break
+                elif self.createChatroom(name):
+                    self.state = 3
+                    break
+                else:
+                    print(Fore.RED + "A Chatroom with name " + name + " already exists!")
+                    print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
+                    time.sleep(1)
+
+        elif selection == "Find Chat Rooms":
+            chat_rooms = self.findChatRooms()
+            if len(chat_rooms) > 0:
+                number = 1
+                print(Fore.RESET + "#  Name".ljust(18) + "Host")
+                for i in range(0, len(chat_rooms), 2):
+                    print(Fore.GREEN + f"{number}  {chat_rooms[i]:15}{chat_rooms[i + 1]}")
+                    number += 1
+            else:
+                print(Fore.YELLOW + "No available Chat Rooms")
+                time.sleep(1)
+
+        elif selection == "Join a Chat Room":
+            while True:
+                name = input(Fore.MAGENTA + "Chat room name: ")
+                if name == 'quit':
+                    break
+                elif self.joinChatroom(name):
+                    self.state = 3
+                    break
+                else:
+                    print(Fore.RED + "No chatroom with the name " + name + "!")
+                    print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
+                    time.sleep(1)
 
         elif selection == "Start a Chat":
             # if user is online, then user is asked to enter the username of the user that is wanted to be chatted
@@ -570,6 +606,15 @@ class peerMain:
         status_code = int(response[2])
         if status_code == 200:
             print(Fore.GREEN + "Connected to the registry...")
+
+    def createChatroom(self, name):
+        pass
+
+    def joinChatroom(self, name):
+        pass
+
+    def findChatRooms(self):
+        return []
 
 
 # log file initialization

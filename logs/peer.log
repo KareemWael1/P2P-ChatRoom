@@ -82,3 +82,51 @@ INFO:root:Send to 192.168.1.5:15600 -> REGISTER Kimo 11add892f9c0c2a172f5700b591
 INFO:root:Received from 192.168.1.5 -> HELLO_BACK SUCCESS 200 
 INFO:root:Send to 172.20.10.6:15600 -> HELLO_P2P
 INFO:root:Received from 172.20.10.6 -> HELLO_BACK SUCCESS 200
+INFO:root:Send to 192.168.1.4:15600 -> HELLO_P2P
+INFO:root:Received from 192.168.1.4 -> HELLO_BACK SUCCESS 200
+INFO:root:Send to 192.168.1.4:15600 -> LOGIN Kareem 92de48cba169d129b103f3b793770e372bad96a28f02bfb46529e5a4bff80205 4398
+INFO:root:Received from 192.168.1.4 -> AUTH <SUCCESS> <200>
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem
+INFO:root:Send to 192.168.1.4:15500 -> KEEP_ALIVE Kareem

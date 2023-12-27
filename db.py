@@ -21,6 +21,7 @@ class DB:
             return True
         else:
             return False
+
     # registers a user
     def register(self, username, password):
         account = {
@@ -38,7 +39,6 @@ class DB:
         count = self.db.online_peers.count_documents({'username': username})
         return count > 0
 
-
     # logs in the user
     def user_login(self, username, ip, port):
         online_peer = {
@@ -55,10 +55,19 @@ class DB:
     # retrieves the ip address and the port number of the username
     def get_peer_ip_port(self, username):
         res = self.db.online_peers.find_one({"username": username})
-        return (res["ip"], res["port"])
+        return res["ip"], res["port"]
 
     def get_online_peer_list(self):
         online_peers_cursor = self.db.online_peers.find()
         online_peers_list = list(online_peers_cursor)
         return online_peers_list
 
+    def add_chat_room(self, name, host):
+        chat_room = {
+            "name": name,
+            "host": host
+        }
+        self.db.chatrooms.insert_one(chat_room)
+
+    def get_chat_rooms_list(self):
+        return list(self.db.chatrooms.find())
