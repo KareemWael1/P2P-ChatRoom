@@ -408,7 +408,10 @@ class peerMain:
                 if name == 'quit':
                     break
                 elif self.createChatroom(name):
+                    print(Fore.GREEN + "A chatroom with name : " + name + " has been created...")
                     self.state = 3
+                    time.sleep(1)
+
                     break
                 else:
                     print(Fore.RED + "A Chatroom with name " + name + " already exists!")
@@ -604,17 +607,74 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         status_code = int(response[2])
-        if status_code == 200:
+        if status_code == "<200>":
             print(Fore.GREEN + "Connected to the registry...")
 
     def createChatroom(self, name):
-        pass
+        message = "CREATE-CHAT-ROOM " + name +  " " + self.loginCredentials[0]
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode().split()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        status_code = response[2]
+        if status_code == "<200>":
 
+            return True
+        else:
+
+
+            return False
     def joinChatroom(self, name):
-        pass
+        message = "JOIN-CHAT-ROOM " + name + " " + self.loginCredentials[0]
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode().split()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        status_code = response[2]
+        if status_code == "<200>":
+            print(Fore.GREEN,"you have joined the room " + name + " successfully...")
+
+            return True
+        print(Fore.RED, "you have failed to join " + name )
+
+        return False
 
     def findChatRooms(self):
-        return []
+        chatrooms_list =[]
+        message = "SHOW-ROOM-LIST"
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        status_code = response.split()[2]
+        if status_code == "<200>":
+
+            # Decode the bytes to a string
+
+            # Extract the list part from the received message
+            list_start_index = response.find("<200>") + len("<200>")
+            chatrooms_list_str = response[list_start_index:].strip()
+
+            # Split the string into a list
+            chatrooms_list = chatrooms_list_str.split()
+
+            # Print the chatrooms list
+
+            print(Fore.CYAN, str(chatrooms_list))
+            return list(chatrooms_list)
+
+        return chatrooms_list
+
+    def exitChatroom(self,room_name):
+        message = "ROOM-EXIT " + self.loginCredentials[0] + " " + room_name
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode().split()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        status_code = response[2]
+        if status_code == "<200>":
+            return True
+        return False
 
 
 # log file initialization

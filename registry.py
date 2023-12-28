@@ -177,6 +177,67 @@ class ClientThread(threading.Thread):
                         response = "PEER_LIST <FAILURE> <404>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
+                elif message[0] == "CREATE-CHAT-ROOM":
+                        # CREATE-exist is sent to peer,
+                        # if a room with this username already exists
+                        if db.is_room_exist(message[1]):
+                            response = "CREATION <FAILURE> <404>"
+                            print("From-> " + self.ip + ":" + str(self.port) + " " + response)
+                            logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                            self.tcpClientSocket.send(response.encode())
+                        else:
+                            db.add_chat_room(message[1],message[2])
+                            response = "CREATION <SUCCESS> <200>"
+                            logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                            self.tcpClientSocket.send(response.encode())
+
+                elif message[0] == "ROOM-EXIT":
+                    if db.is_room_exist(message[2]):
+                        db.remove_peer_from_chatroom(message[1], message[2])
+                        response = "ROOM-EXIT-RESPONSE <SUCCESS> <200>"
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
+                        self.tcpClientSocket.send(response.encode())
+                    else :
+                        response = "ROOM-EXIT-RESPONSE <FAILURE> <404>"
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
+                        self.tcpClientSocket.send(response.encode())
+
+                elif message[0] == "JOIN-CHAT-ROOM":
+                    # checks if an account with the username exists
+                    if db.is_room_exist(message[1]):
+                        # checks if the room exists
+                        # and sends the related response to peer
+                        peers = db.get_chatroom_peers(message[1])
+                        peers.append(message[2])
+                        peers = list(set(peers))
+                        db.update_chatroom(message[1], peers)
+                        response = "JOIN <SUCCESS> <200>"
+
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
+                    else:
+                        response = "JOIN <FAILURE> <404>"
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
+
+                    # enters if username does not exist
+
+                elif message[0] == "SHOW-ROOM-LIST":
+                    # checks if an account with the username exists
+                    chat_rooms_list = db.get_chat_rooms_list()
+
+                    if chat_rooms_list is not None:
+                        response = "ROOMS-LIST <SUCCESS> <200> " + ' '.join(
+                            f"{chatroom['name']} ({chatroom['peers']})" for chatroom in chat_rooms_list
+                        )
+
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
+
+
+
 
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))

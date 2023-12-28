@@ -62,12 +62,36 @@ class DB:
         online_peers_list = list(online_peers_cursor)
         return online_peers_list
 
-    def add_chat_room(self, name, host):
+    def add_chat_room(self,name, host):
         chat_room = {
             "name": name,
-            "host": host
+            "peers": [host]
         }
-        self.db.chatrooms.insert_one(chat_room)
+        self.db.Chatrooms.insert_one(chat_room)
 
     def get_chat_rooms_list(self):
-        return list(self.db.chatrooms.find())
+        return list(self.db.Chatrooms.find())
+
+    def is_room_exist(self, room_name):
+        count = self.db.Chatrooms.count_documents({'name': room_name})
+
+        return count > 0
+
+    def remove_peer_from_chatroom(self,username, room_name):
+        chat_room = self.db.Chatrooms.find_one({"name": room_name})
+        chat_room["peers"].remove(username)
+
+    def get_chatroom_peers(self,room_name):
+
+            chat_room = self.db.Chatrooms.find_one({"name": room_name})
+
+            if chat_room:
+                return chat_room.get("peers", [])
+            else:
+                return []
+    def update_chatroom(self , room_name, peers):
+
+        self.db.Chatrooms.update_one(
+            {"name": room_name},
+            {"$set": {"peers": peers}}
+        )
