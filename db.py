@@ -77,9 +77,20 @@ class DB:
 
         return count > 0
 
-    def remove_peer_from_chatroom(self,username, room_name):
+    def remove_peer_from_chatroom(self, username, room_name):
+        # Find the chat room
         chat_room = self.db.Chatrooms.find_one({"name": room_name})
-        chat_room["peers"].remove(username)
+
+        # Check if the chat room exists
+        if chat_room:
+            # Remove the username from the list of peers
+            chat_room["peers"].remove(username)
+
+            # Update the database with the modified chat room
+            self.db.Chatrooms.update_one(
+                {"name": room_name},
+                {"$set": {"peers": chat_room["peers"]}}
+            )
 
     def get_chatroom_peers(self,room_name):
 

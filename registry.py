@@ -224,17 +224,34 @@ class ClientThread(threading.Thread):
 
                     # enters if username does not exist
 
+
                 elif message[0] == "SHOW-ROOM-LIST":
+
                     # checks if an account with the username exists
+
                     chat_rooms_list = db.get_chat_rooms_list()
 
                     if chat_rooms_list is not None:
+
                         response = "ROOMS-LIST <SUCCESS> <200> " + ' '.join(
-                            f"{chatroom['name']} ({chatroom['peers']})" for chatroom in chat_rooms_list
+
+                            f" {chatroom['name']} : {chatroom['peers']} ,)" for chatroom in chat_rooms_list
+
                         )
 
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
                         self.tcpClientSocket.send(response.encode())
+
+                    else:
+
+                        response = "ROOM-LIST <FAILURE> <404>"
+
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
+                        self.tcpClientSocket.send(response.encode())
+
+
 
 
 

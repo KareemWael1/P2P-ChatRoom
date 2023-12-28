@@ -308,9 +308,10 @@ class peerMain:
         self.peerClient = None
         # timer initialization
         self.timer = None
+        self.chatroom = None
         # User Interface
         self.state = 0
-        self.states = {1: "Welcome!", 2: "Main Menu"}
+        self.states = {1: "Welcome!", 2: "Main Menu", 3: "Chat room"}
         self.options = {1: {1: "Signup", 2: "Login", 3: "Exit"},
                         2: {1: "Find Online Users", 2: "Search User", 3: "Start a Chat",
                             4: "Create a Chat Room", 5: "Find Chat Rooms", 6: "Join a Chat Room",
@@ -421,11 +422,12 @@ class peerMain:
         elif selection == "Find Chat Rooms":
             chat_rooms = self.findChatRooms()
             if len(chat_rooms) > 0:
-                number = 1
-                print(Fore.RESET + "#  Name".ljust(18) + "Host")
-                for i in range(0, len(chat_rooms), 2):
-                    print(Fore.GREEN + f"{number}  {chat_rooms[i]:15}{chat_rooms[i + 1]}")
-                    number += 1
+                pass
+                    #     number = 1
+                    #     print(Fore.RESET + "#  Name".ljust(18) + "Host")
+                    #     for i in range(0, len(chat_rooms), 2):
+                    #         print(Fore.GREEN + f"{number}  {chat_rooms[i]:15}{chat_rooms[i + 1]}")
+                    #         number += 1
             else:
                 print(Fore.YELLOW + "No available Chat Rooms")
                 time.sleep(1)
@@ -457,7 +459,10 @@ class peerMain:
                                                  self.peerServer, None)
                     self.peerClient.start()
                     self.peerClient.join()
+        elif selection == "Leave room":
 
+            if self.exitChatroom(self.loginCredentials[0]):
+                self.state = 2
         # if this is the receiver side then it will get the prompt to accept an incoming request during the main
         # loop that's why response is evaluated in main process not the server thread even though the prompt is
         # printed by server if the response is ok then a client is created for this peer with the OK message and
@@ -618,7 +623,7 @@ class peerMain:
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         status_code = response[2]
         if status_code == "<200>":
-
+            self.chatroom = name
             return True
         else:
 
@@ -633,7 +638,7 @@ class peerMain:
         status_code = response[2]
         if status_code == "<200>":
             print(Fore.GREEN,"you have joined the room " + name + " successfully...")
-
+            self.chatroom = name
             return True
         print(Fore.RED, "you have failed to join " + name )
 
@@ -665,8 +670,8 @@ class peerMain:
 
         return chatrooms_list
 
-    def exitChatroom(self,room_name):
-        message = "ROOM-EXIT " + self.loginCredentials[0] + " " + room_name
+    def exitChatroom(self,username):
+        message = "ROOM-EXIT " + username + " " + self.chatroom
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode().split()
