@@ -24762,3 +24762,221 @@ INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE lagger
 INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE lagger
 INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE lagger
 INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE lagger
+INFO:root:Send to 26.5.138.186:15600 -> HELLO_P2P
+INFO:root:Received from 26.5.138.186 -> HELLO_BACK SUCCESS 200
+INFO:root:Send to 26.5.138.186:15600 -> REGISTER eyo ea325ea6b7283e7d8d7d7672caee443f13a193b6eab4de911d517a0ddc630f01
+INFO:root:Received from 26.5.138.186 -> REGISTER <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15600 -> LOGIN eyo ea325ea6b7283e7d8d7d7672caee443f13a193b6eab4de911d517a0ddc630f01 5
+INFO:root:Received from 26.5.138.186 -> AUTH <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15600 -> JOIN-CHAT-ROOM tgrba eyo
+INFO:root:Received from 26.5.138.186 -> JOIN <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15600 -> DISCOVER-ROOM-PEERS tgrba
+INFO:root:Received from 26.5.138.186 -> P E E R - L I S T   < S U C C E S S >   < 2 0 0 >   g g y o u   e y o   8   a y h a g a   l o g i n   h o s s i e n
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyo
+INFO:root:Send to 26.5.138.186:15600 -> HELLO_P2P
+INFO:root:Received from 26.5.138.186 -> HELLO_BACK SUCCESS 200
+INFO:root:Send to 26.5.138.186:15600 -> REGISTER eyos 53407e06b4b0f6964c9669958f17c1d789ce26b7e35717f63835fa2da66c7d93
+INFO:root:Received from 26.5.138.186 -> REGISTER <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15600 -> LOGIN eyos 53407e06b4b0f6964c9669958f17c1d789ce26b7e35717f63835fa2da66c7d93 1251
+INFO:root:Received from 26.5.138.186 -> AUTH <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15600 -> JOIN-CHAT-ROOM tgrba eyos
+INFO:root:Received from 26.5.138.186 -> JOIN <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15600 -> DISCOVER-ROOM-PEERS tgrba
+INFO:root:Received from 26.5.138.186 -> P E E R - L I S T   < S U C C E S S >   < 2 0 0 >   g g y o u   e y o   8   a y h a g a   e y o s   l o g i n   h o s s i e n
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15600 -> HELLO_P2P
+INFO:root:Received from 26.5.138.186 -> HELLO_BACK SUCCESS 200
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15600 -> REGISTER eye 47c215b5f70eb9c9b4bcb2c027007d6cf38a899f40d1d1da6922e49308b15b69
+INFO:root:Received from 26.5.138.186 -> REGISTER <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15600 -> LOGIN eye 47c215b5f70eb9c9b4bcb2c027007d6cf38a899f40d1d1da6922e49308b15b69 151
+INFO:root:Received from 26.5.138.186 -> AUTH <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15600 -> JOIN-CHAT-ROOM tgrba eye
+INFO:root:Received from 26.5.138.186 -> JOIN <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15600 -> DISCOVER-ROOM-PEERS tgrba
+INFO:root:Received from 26.5.138.186 -> P E E R - L I S T   < S U C C E S S >   < 2 0 0 >   g g y o u   e y o   8   e y o s   a y h a g a   e y e   l o g i n   h o s s i e n
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15600 -> DISCOVER-ROOM-PEERS tgrba
+INFO:root:Received from 26.5.138.186 -> P E E R - L I S T   < S U C C E S S >   < 2 0 0 >   g g y o u   e y o   8   e y o s   a y h a g a   e y e   l o g i n   h o s s i e n
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15600 -> ROOM-EXIT eyos tgrba
+INFO:root:Received from 26.5.138.186 -> ROOM-EXIT-RESPONSE <SUCCESS> <200>
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15600 -> DISCOVER-ROOM-PEERS tgrba
+INFO:root:Received from 26.5.138.186 -> P E E R - L I S T   < S U C C E S S >   < 2 0 0 >   g g y o u   e y o   8   a y h a g a   e y e   l o g i n   h o s s i e n
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eye
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos
+INFO:root:Send to 26.5.138.186:15500 -> KEEP_ALIVE eyos

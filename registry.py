@@ -251,6 +251,29 @@ class ClientThread(threading.Thread):
 
                         self.tcpClientSocket.send(response.encode())
 
+                elif message[0] == "DISCOVER-ROOM-PEERS":
+
+                    peer_room_list = db.get_chatroom_peers(message[1])
+
+                    if peer_room_list is not None:
+
+                        response = "PEER-LIST <SUCCESS> <200> " + ' '.join(
+
+                            f"{peer}" for peer in peer_room_list
+
+                        )
+
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
+                        self.tcpClientSocket.send(response.encode())
+
+                    else:
+
+                        response = "PEER-LIST <FAILURE> <404>"
+
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+
+                        self.tcpClientSocket.send(response.encode())
 
 
 

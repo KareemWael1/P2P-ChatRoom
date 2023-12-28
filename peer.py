@@ -316,7 +316,7 @@ class peerMain:
                         2: {1: "Find Online Users", 2: "Search User", 3: "Start a Chat",
                             4: "Create a Chat Room", 5: "Find Chat Rooms", 6: "Join a Chat Room",
                             7: "Logout"},
-                        3: {1: "Send message", 2: "Leave room"}}
+                        3: {1: "Send message", 2: "Leave room", 3: "show room peers"}}
 
         # as long as the user is not logged out, asks to select an option in the menu
         while True:
@@ -463,6 +463,8 @@ class peerMain:
 
             if self.exitChatroom(self.loginCredentials[0]):
                 self.state = 2
+        elif selection =="show room peers" :
+            self.getRoomPeers()
         # if this is the receiver side then it will get the prompt to accept an incoming request during the main
         # loop that's why response is evaluated in main process not the server thread even though the prompt is
         # printed by server if the response is ok then a client is created for this peer with the OK message and
@@ -680,6 +682,28 @@ class peerMain:
         if status_code == "<200>":
             return True
         return False
+
+    def getRoomPeers(self):
+        room_peers = []
+        message = "DISCOVER-ROOM-PEERS " + self.chatroom
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        status_code = response.split()[2]
+        if status_code == "<200>":
+            # Assuming peers are present in the response starting from index 3
+            list_start_index = response.find("<200>") + len("<200>")
+            peerlist_list_str = response[list_start_index:].strip()
+
+            # Split the string into a list
+            room_peers = peerlist_list_str.split()
+
+            # Print the chatrooms list
+
+            print(Fore.CYAN, str(room_peers))
+            return list(room_peers)
+        return room_peers
 
 
 # log file initialization
