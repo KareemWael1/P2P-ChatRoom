@@ -212,8 +212,9 @@ class ClientThread(threading.Thread):
                         peers = db.get_chatroom_peers(message[1])
                         peers.append(message[2])
                         peers = list(set(peers))
+                        room_host = db.get_chatroom_host(message[1])
                         db.update_chatroom(message[1], peers)
-                        response = "JOIN <SUCCESS> <200>"
+                        response = "JOIN <SUCCESS> <200> " + room_host
 
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
@@ -360,17 +361,16 @@ udpSocket = socket(AF_INET, SOCK_DGRAM)
 tcpSocket.bind((host, port))
 udpSocket.bind((host, portUDP))
 tcpSocket.listen(1000)
+print("Listening for incoming connections...")
 
 # input sockets that are listened
 inputs = [tcpSocket, udpSocket]
 
 # log file initialization
-logging.basicConfig(filename="logs/registry.log", level=logging.INFO)
+# logging.basicConfig(filename="logs/registry.log", level=logging.INFO)
 
 # as long as at least a socket exists to listen registry runs
 while inputs:
-
-    print("Listening for incoming connections...")
     # monitors for the incoming connections
     readable, writable, exceptional = select.select(inputs, [], [])
     for s in readable:
@@ -396,7 +396,6 @@ while inputs:
                 if message[1] in tcpThreads:
                     # resets the timeout for that peer since the hello message is received
                     tcpThreads[message[1]].resetTimeout()
-                    print("KEEP_ALIVE is received from " + message[1])
                     logging_message = "KEEP_ALIVE <SUCCESS> <200>"
 
                     logging.info(
