@@ -42,7 +42,7 @@ class PeerServer(threading.Thread):
                 sender = data.split(':')[0]
                 if sender == "System" and data[-1] == '.':
                     print(Fore.YELLOW + data)
-                if sender == "System" and data[-1] == '!':
+                elif sender == "System" and data[-1] == '!':
                     print(Fore.GREEN + data)
                 elif sender != self.username:
                     print(Fore.BLUE + data)
