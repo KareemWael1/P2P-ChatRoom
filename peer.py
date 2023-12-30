@@ -32,15 +32,18 @@ class PeerServer(threading.Thread):
         # Join the multicast group
         self.udp_socket.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton(self.multicast_group)
                                    + inet_aton('0.0.0.0'))
-
+        # Initial receive that you have joined
+        self.udp_socket.recvfrom(1024)
         try:
             # Receive data
             while True:
                 data, address = self.udp_socket.recvfrom(1024)
                 data = data.decode()
                 sender = data.split(':')[0]
-                if sender == "System":
+                if sender == "System" and data[-1] == '.':
                     print(Fore.YELLOW + data)
+                if sender == "System" and data[-1] == '!':
+                    print(Fore.GREEN + data)
                 elif sender != self.username:
                     print(Fore.BLUE + data)
         # handles the exceptions, and logs them
@@ -81,6 +84,8 @@ class PeerClient(threading.Thread):
         self.udp_socket.setsockopt(IPPROTO_IP, IP_MULTICAST_TTL, struct.pack('b', 1))
 
     def group_chat(self):
+        message = "System: User " + self.username + " joined!"
+        self.udp_socket.sendto(message.encode(), (self.multicast_group, self.multicast_port))
         print(Fore.GREEN + "Welcome to Chatroom " + self.chatroom_name)
         print("Enter a message to send, enter 'q' to leave the room\n")
         while True:
