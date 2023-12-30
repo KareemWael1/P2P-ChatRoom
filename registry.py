@@ -180,7 +180,7 @@ class ClientThread(threading.Thread):
                 elif message[0] == "CREATE-CHAT-ROOM":
                     # CREATE-exist is sent to peer,
                     # if a room with this username already exists
-                    if db.is_room_exist(message[1]):
+                    if db.is_room_exist(message[1:-1]):
                         response = "CREATION <FAILURE> <404>"
                         print("From-> " + self.ip + ":" + str(self.port) + " " + response)
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
@@ -260,8 +260,12 @@ class ClientThread(threading.Thread):
                 logging.error("OSError: {0}".format(oErr))
                 response = "HELLO_BACK " + "FAILURE " + "404"
                 logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-
                 db.user_logout(self.username)
+            except ConnectionResetError as cErr:
+                logging.error("ConnectionResetError: {0}".format(cErr))
+                db.user_logout(self.username)
+            except IndexError as iErr:
+                logging.error("IndexError: {0}".format(iErr))
 
     # function for resetting the timeout for the udp timer thread
     def resetTimeout(self):
@@ -285,8 +289,6 @@ class UDPServer(threading.Thread):
     def waitKeepAliveMessage(self):
 
         if self.username is not None:
-            notification = "TIMEOUT " + self.username
-            self.tcpClientSocket.send(notification.encode())
             db.user_logout(self.username)
             if self.username in tcpThreads:
                 del tcpThreads[self.username]
@@ -342,7 +344,7 @@ print("Listening for incoming connections...")
 inputs = [tcpSocket, udpSocket]
 
 # log file initialization
-# logging.basicConfig(filename="logs/registry.log", level=logging.INFO)
+logging.basicConfig(filename="logs/registry.log", level=logging.INFO)
 
 # as long as at least a socket exists to listen registry runs
 while inputs:
@@ -372,10 +374,7 @@ while inputs:
                     # resets the timeout for that peer since the hello message is received
                     tcpThreads[message[1]].resetTimeout()
                     logging_message = "KEEP_ALIVE <SUCCESS> <200>"
-
-                    logging.info(
-                        "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
-                    # Send the response back to the UDP client
+                     # Send the response back to the UDP client
 
 # registry tcp socket is closed
 tcpSocket.close()

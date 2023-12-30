@@ -191,8 +191,9 @@ class peerMain:
                 self.logout(1)
                 self.isOnline = False
                 self.loginCredentials = (None, None)
-                self.peerServer.isOnline = False
-                self.peerServer.udp_socket.close()
+                if self.peerServer is not None:
+                    self.peerServer.isOnline = False
+                    self.peerServer.udp_socket.close()
                 if self.peerClient is not None:
                     self.peerClient.udp_socket.close()
                 print(Fore.GREEN + "Logged out successfully")
@@ -244,10 +245,12 @@ class peerMain:
             chat_rooms = self.findChatRooms()
             if len(chat_rooms) > 0:
                 number = 1
-                print(Fore.RESET + "#  Name".ljust(18) + "Host".ljust(15) + "group")
+                print(Fore.RESET + "#  Name".ljust(18) + "Host".ljust(15) + "Users in Chatroom")
                 for chat_room in chat_rooms:
                     chat_room = str(chat_room).strip().split()
-                    print(Fore.GREEN + f"{number}  {chat_room[0]:15}{chat_room[2]:15}{chat_room[1]}")
+                    users = (str(chat_room[1:-1]).replace('[', '').replace(']', '')
+                             .replace('\"', '').replace("\'", '')).replace(',,', ',')
+                    print(Fore.GREEN + f"{number}  {chat_room[0]:15}{chat_room[-1]:15}{users}")
                     number += 1
             else:
                 print(Fore.YELLOW + "No available Chat Rooms")
@@ -449,8 +452,6 @@ class peerMain:
 
             # Split the string into a list
             chatrooms_list = list(chatrooms_list_str.split('.'))[:-1]
-            for chatroom in chatrooms_list:
-                chatroom = chatroom.split()
             return chatrooms_list
         return chatrooms_list
 
@@ -506,6 +507,6 @@ class peerMain:
 
 
 # log file initialization
-# logging.basicConfig(filename="logs/peer.log", level=logging.INFO)
+logging.basicConfig(filename="logs/peer.log", level=logging.INFO)
 # peer is started
 main = peerMain()

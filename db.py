@@ -51,10 +51,12 @@ class DB:
 
     # logs out the user
     def user_logout(self, username):
-        chatroom = self.db.online_peers.find_one({"username": username})["chatroom"]
-        if chatroom:
-            self.remove_peer_from_chatroom(username, chatroom)
-        self.db.online_peers.delete_one({"username": username})
+        user = self.db.online_peers.find_one({"username": username})
+        if user:
+            chatroom = self.db.online_peers.find_one({"username": username})["chatroom"]
+            if chatroom:
+                self.remove_peer_from_chatroom(username, chatroom)
+            self.db.online_peers.delete_one({"username": username})
 
     # retrieves the ip address and the port number of the username
     def get_peer_ip_port(self, username):
