@@ -44,12 +44,16 @@ class DB:
         online_peer = {
             "username": username,
             "ip": ip,
-            "port": port
+            "port": port,
+            "chatroom": None
         }
         self.db.online_peers.insert_one(online_peer)
 
     # logs out the user
     def user_logout(self, username):
+        chatroom = self.db.online_peers.find_one({"username": username})["chatroom"]
+        if chatroom:
+            self.remove_peer_from_chatroom(username, chatroom)
         self.db.online_peers.delete_one({"username": username})
 
     # retrieves the ip address and the port number of the username
@@ -57,10 +61,27 @@ class DB:
         res = self.db.online_peers.find_one({"username": username})
         return res["ip"], res["port"]
 
+    def get_peer_chatroom(self, username):
+        res = self.db.online_peers.find_one({"username": username})
+        return res["chatroom"]
+
     def get_online_peer_list(self):
         online_peers_cursor = self.db.online_peers.find()
         online_peers_list = list(online_peers_cursor)
         return online_peers_list
+
+    def add_online_peer_chatroom(self, username, room_name):
+        res = self.db.online_peers.find_one({"username": username})
+        self.db.online_peers.update_one(
+            {"username": res["username"]},
+            {
+                "$set": {
+                    "ip": res["ip"],
+                    "port": res["port"],
+                    "chatroom": room_name
+                }
+            }
+        )
 
     def add_chat_room(self, name, host):
         chat_room = {
@@ -87,13 +108,24 @@ class DB:
             # Remove the username from the list of peers
             chat_room["peers"].remove(username)
 
+            if len(chat_room["peers"]) == 0:
+                self.delete_chatroom(room_name)
+                return
+            if chat_room["host"] == username:
+                chat_room["host"] = chat_room["peers"][0]
+
             # Update the database with the modified chat room
             self.db.Chatrooms.update_one(
                 {"name": room_name},
-                {"$set": {"peers": chat_room["peers"]}}
+                {
+                    "$set": {
+                        "peers": chat_room["peers"],
+                        "host": chat_room["host"]
+                    }
+                }
             )
 
-    def get_chatroom_peers(self,room_name):
+    def get_chatroom_peers(self, room_name):
 
         chat_room = self.db.Chatrooms.find_one({"name": room_name})
 
@@ -111,15 +143,17 @@ class DB:
         else:
             return None
 
-    def update_chatroom(self, room_name, peers):
-
+    def update_chatroom(self, room_name, peers, host):
         self.db.Chatrooms.update_one(
             {"name": room_name},
-            {"$set": {"peers": peers}}
+            {
+                "$set": {
+                    "peers": peers,
+                    "host": host
+                }
+            }
         )
 
     # Deletes the chatroom
     def delete_chatroom(self, name):
-        self.db.online_peers.delete_one({"name": name})
-
-
+        self.db.Chatrooms.delete_one({"name": name})

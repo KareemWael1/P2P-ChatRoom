@@ -178,18 +178,19 @@ class ClientThread(threading.Thread):
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
                 elif message[0] == "CREATE-CHAT-ROOM":
-                        # CREATE-exist is sent to peer,
-                        # if a room with this username already exists
-                        if db.is_room_exist(message[1]):
-                            response = "CREATION <FAILURE> <404>"
-                            print("From-> " + self.ip + ":" + str(self.port) + " " + response)
-                            logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-                            self.tcpClientSocket.send(response.encode())
-                        else:
-                            db.add_chat_room(message[1],message[2])
-                            response = "CREATION <SUCCESS> <200>"
-                            logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-                            self.tcpClientSocket.send(response.encode())
+                    # CREATE-exist is sent to peer,
+                    # if a room with this username already exists
+                    if db.is_room_exist(message[1]):
+                        response = "CREATION <FAILURE> <404>"
+                        print("From-> " + self.ip + ":" + str(self.port) + " " + response)
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
+                    else:
+                        db.add_chat_room(message[1], message[2])
+                        db.add_online_peer_chatroom(message[2], message[1])
+                        response = "CREATION <SUCCESS> <200>"
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
 
                 elif message[0] == "ROOM-EXIT":
                     if db.is_room_exist(message[2]):
@@ -198,7 +199,7 @@ class ClientThread(threading.Thread):
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
 
                         self.tcpClientSocket.send(response.encode())
-                    else :
+                    else:
                         response = "ROOM-EXIT-RESPONSE <FAILURE> <404>"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
 
@@ -213,7 +214,8 @@ class ClientThread(threading.Thread):
                         peers.append(message[2])
                         peers = list(set(peers))
                         room_host = db.get_chatroom_host(message[1])
-                        db.update_chatroom(message[1], peers)
+                        db.update_chatroom(message[1], peers, room_host)
+                        db.add_online_peer_chatroom(message[2], message[1])
                         response = "JOIN <SUCCESS> <200> " + room_host
 
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
@@ -227,58 +229,32 @@ class ClientThread(threading.Thread):
 
 
                 elif message[0] == "SHOW-ROOM-LIST":
-
-                    # checks if an account with the username exists
-
                     chat_rooms_list = db.get_chat_rooms_list()
-
                     if chat_rooms_list is not None:
-
                         response = "ROOMS-LIST <SUCCESS> <200> " + ' '.join(
-
-                            f" {chatroom['name']} : {chatroom['peers']} ,)" for chatroom in chat_rooms_list
-
+                            f"{chatroom['name']} {chatroom['peers']} {chatroom['host']}."
+                            for chatroom in chat_rooms_list
                         )
 
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-
                         self.tcpClientSocket.send(response.encode())
-
                     else:
-
                         response = "ROOM-LIST <FAILURE> <404>"
-
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-
                         self.tcpClientSocket.send(response.encode())
 
                 elif message[0] == "DISCOVER-ROOM-PEERS":
-
                     peer_room_list = db.get_chatroom_peers(message[1])
-
                     if peer_room_list is not None:
-
                         response = "PEER-LIST <SUCCESS> <200> " + ' '.join(
-
                             f"{peer}" for peer in peer_room_list
-
                         )
-
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-
                         self.tcpClientSocket.send(response.encode())
-
                     else:
-
                         response = "PEER-LIST <FAILURE> <404>"
-
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-
                         self.tcpClientSocket.send(response.encode())
-
-
-
-
 
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))
@@ -287,8 +263,7 @@ class ClientThread(threading.Thread):
 
                 db.user_logout(self.username)
 
-                # function for resetting the timeout for the udp timer thread
-
+    # function for resetting the timeout for the udp timer thread
     def resetTimeout(self):
         self.udpServer.resetTimer()
 

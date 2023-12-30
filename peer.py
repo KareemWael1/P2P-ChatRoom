@@ -88,7 +88,10 @@ class PeerClient(threading.Thread):
                 message = input()
                 if message == 'q':
                     message = "System: User " + self.username + " left."
+                    self.peerServer.udp_socket.close()
+                    time.sleep(0.1)
                     self.udp_socket.sendto(message.encode(), (self.multicast_group, self.multicast_port))
+                    self.udp_socket.close()
                     return
                 message = self.username + ": " + message
                 self.udp_socket.sendto(message.encode(), (self.multicast_group, self.multicast_port))
@@ -141,9 +144,8 @@ class peerMain:
         self.state = 0
         self.states = {1: "Welcome!", 2: "Main Menu"}
         self.options = {1: {1: "Signup", 2: "Login", 3: "Exit"},
-                        2: {1: "Find Online Users", 2: "Search User", 3: "Start a Chat",
-                            4: "Create a Chat Room", 5: "Find Chat Rooms", 6: "Join a Chat Room",
-                            7: "Logout"}}
+                        2: {1: "Find Online Users", 2: "Search User", 3: "Create a Chat Room",
+                            4: "Find Chat Rooms",5: "Join a Chat Room", 6: "Logout"}}
         # as long as the user is not logged out, asks to select an option in the menu
         while True:
             # menu selection prompt
@@ -232,8 +234,6 @@ class peerMain:
                 if name == 'quit':
                     break
                 elif self.createChatroom(name):
-                    print(Fore.GREEN + "A chatroom with name " + name + " has been created...")
-                    time.sleep(1)
                     break
                 else:
                     print(Fore.RED + "A Chatroom with name " + name + " already exists!")
@@ -244,9 +244,10 @@ class peerMain:
             chat_rooms = self.findChatRooms()
             if len(chat_rooms) > 0:
                 number = 1
-                print(Fore.RESET + "#  Name".ljust(18) + "Host")
-                for i in range(0, len(chat_rooms), 2):
-                    print(Fore.GREEN + f"{number}  {chat_rooms[i]:15}{chat_rooms[i + 1]}")
+                print(Fore.RESET + "#  Name".ljust(18) + "Host".ljust(15) + "group")
+                for chat_room in chat_rooms:
+                    chat_room = str(chat_room).strip().split()
+                    print(Fore.GREEN + f"{number}  {chat_room[0]:15}{chat_room[2]:15}{chat_room[1]}")
                     number += 1
             else:
                 print(Fore.YELLOW + "No available Chat Rooms")
@@ -411,6 +412,8 @@ class peerMain:
         status_code = response[2]
         if status_code == "<200>":
             self.chatroom = name
+            print(Fore.GREEN + "A chatroom with name " + name + " has been created...\n")
+            time.sleep(1)
             self.connect_to_chatroom(self.loginCredentials[0])
             return True
         else:
@@ -424,12 +427,11 @@ class peerMain:
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         status_code = response[2]
         if status_code == "<200>":
-            print(Fore.GREEN + "You have joined the room " + name + " successfully...")
+            print(Fore.GREEN + "You have joined the room " + name + " successfully...\n")
+            time.sleep(0.5)
             self.chatroom = name
             self.connect_to_chatroom(response[3])
             return True
-        print(Fore.RED, "you have failed to join " + name)
-
         return False
 
     def findChatRooms(self):
@@ -441,20 +443,15 @@ class peerMain:
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         status_code = response.split()[2]
         if status_code == "<200>":
-            # Decode the bytes to a string
-
             # Extract the list part from the received message
             list_start_index = response.find("<200>") + len("<200>")
             chatrooms_list_str = response[list_start_index:].strip()
 
             # Split the string into a list
-            chatrooms_list = chatrooms_list_str.split()
-
-            # Print the chatrooms list
-
-            print(Fore.CYAN, str(chatrooms_list))
-            return list(chatrooms_list)
-
+            chatrooms_list = list(chatrooms_list_str.split('.'))[:-1]
+            for chatroom in chatrooms_list:
+                chatroom = chatroom.split()
+            return chatrooms_list
         return chatrooms_list
 
     def exitChatroom(self, username):
