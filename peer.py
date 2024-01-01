@@ -38,7 +38,7 @@ class PeerServer(threading.Thread):
             # Receive data
             while True:
                 data, address = self.udp_socket.recvfrom(1024)
-                data = data.decode()
+                data = self.format_message(data.decode())
                 sender = data.split(':')[0]
                 if sender == "System" and data[-1] == '.':
                     print(Fore.YELLOW + data)
@@ -54,6 +54,21 @@ class PeerServer(threading.Thread):
         finally:
             # Close the socket when done
             self.udp_socket.close()
+
+    def format_message(self, message):
+        # Format italic text (~italic~)
+        message = message.replace('~', '\033[3m', 1)
+        message = message[::-1].replace('~', 'm32[\033', 1)[::-1]
+
+        # Format bold text (*bold*)
+        message = message.replace('*', '\033[1m', 1)
+        message = message[::-1].replace('*', 'm22[\033', 1)[::-1]
+
+        # Format underline text (_underline_)
+        message = message.replace('_', '\033[4m', 1)
+        message = message[::-1].replace('_', 'm42[\033', 1)[::-1]
+
+        return message
 
 
 # Client side of peer
