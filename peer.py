@@ -12,31 +12,35 @@ import utility
 class PeerServer(threading.Thread):
 
     # Peer server initialization
-    def __init__(self, username, peerServerPort):
+    def __init__(self, username, peerServerIP, peerServerPort):
         threading.Thread.__init__(self)
         # keeps the username of the peer
         self.username = username
-        # Create a UDP socket for receiving multicast data
-        self.udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-        # Allow multiple sockets to use the same port
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        # The multicast address and port
+        # Multicast configuration
+        self.udp_socket = None
         self.multicast_group = '224.1.1.1'
-        self.multicast_port = peerServerPort
+        self.multicast_port = None
+        self.group_session = False
         # One to One chatting
-        self.port = peerServerPort
-        self.personal_udp_socket = socket(AF_INET, SOCK_DGRAM)
-        self.personal_udp_socket.bind(('localhost', self.port))
+        self.private_udp_socket = socket(AF_INET, SOCK_DGRAM)
+        self.private_udp_socket.bind((peerServerIP, peerServerPort))
+        self.one_to_one_session = False
 
     # main method of the peer server thread
     def run(self):
         # Start the thread to receive One-to-One messages
-        personal_receive_thread = threading.Thread(target=self.receive_personal_messages)
-        personal_receive_thread.start()
+        threading.Thread(target=self.receive_private_messages).start()
+        while True:
+            if self.group_session:
+                self.receive_group_messages()
 
+    def receive_group_messages(self):
+        # Create a UDP socket for receiving multicast data
+        self.udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+        # Allow multiple sockets to use the same port
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         # Bind the socket to the multicast port
         self.udp_socket.bind(('', self.multicast_port))
-
         # Join the multicast group
         self.udp_socket.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, inet_aton(self.multicast_group)
                                    + inet_aton('0.0.0.0'))
@@ -66,12 +70,15 @@ class PeerServer(threading.Thread):
     def receive_private_messages(self):
         try:
             while True:
-                data, address = self.personal_udp_socket.recvfrom(1024)
-                # Process the received personal message as needed
-                print(f"Received message: {data.decode()} from {address}")
+                data, address = self.private_udp_socket.recvfrom(1024)
+                # Process the received private message as needed
+                if self.one_to_one_session:
+                    print(Fore.BLUE + data.decode())
+                else:
+                    print(Fore.LIGHTMAGENTA_EX + "\nNotification: Received a private massage from " +
+                          str(address) + " " + data.decode())
         except Exception as e:
-            print("Error receiving personal message:", e)
-
+            logging.error(e)
     def format_message(self, message):
         # Format italic text (~italic~)
         message = message.replace('~', '\033[3m', 1)
@@ -91,7 +98,7 @@ class PeerServer(threading.Thread):
 # Client side of peer
 class PeerClient(threading.Thread):
     # variable initializations for the client side of the peer
-    def __init__(self, port, username, peerServer, chatroom_name):
+    def __init__(self, port, username, peerServer, chatroom_name, target_ip, target_port, target_username):
         threading.Thread.__init__(self)
         # keeps the username of the peer
         self.username = username
@@ -107,9 +114,10 @@ class PeerClient(threading.Thread):
         self.multicast_group = '224.1.1.1'
         self.multicast_port = port
         # One-to-One
-        self.server_ip = server_ip
-        self.server_port = server_port
-        self.udp_socket = socket(AF_INET, SOCK_DGRAM)
+        self.target_ip = target_ip
+        self.target_port = target_port
+        self.target_username = target_username
+        self.private_udp_socket = socket(AF_INET, SOCK_DGRAM)
 
     # main method of the peer client thread
     def run(self):
@@ -141,6 +149,33 @@ class PeerClient(threading.Thread):
                 logging.error("OSError: {0}".format(oErr))
             except ValueError as vErr:
                 logging.error("ValueError: {0}".format(vErr))
+
+    def chat(self):
+        print(Fore.RESET + "You are now chatting with " + self.target_username)
+        print("Enter a message to send, enter 'q' to leave\n")
+        while True:
+            try:
+                message = input()
+                if message == 'q':
+                    message = "System: User " + self.username + " left."
+                    self.peerServer.private_udp_socket.close()
+                    time.sleep(0.1)
+                    self.private_udp_socket.sendto(message.encode(), (self.target_ip, self.target_port))
+                    self.private_udp_socket.close()
+                    return
+                message = self.username + ": " + message
+                self.private_udp_socket.sendto(message.encode(), (self.target_ip, self.target_port))
+
+            # handles the exceptions, and logs them
+            except OSError as oErr:
+                logging.error("OSError: {0}".format(oErr))
+            except ValueError as vErr:
+                logging.error("ValueError: {0}".format(vErr))
+
+    def setup_private_chat(self, target_ip, target_port, target_username):
+        self.target_ip = target_ip
+        self.target_port = target_port
+        self.target_username = target_username
 
 
 # main process of the peer
@@ -186,7 +221,7 @@ class peerMain:
         self.states = {1: "Welcome!", 2: "Main Menu"}
         self.options = {1: {1: "Signup", 2: "Login", 3: "Exit"},
                         2: {1: "Find Online Users", 2: "Search User", 3: "Create a Chat Room",
-                            4: "Find Chat Rooms", 5: "Join a Chat Room", 6: "Chat with a User", 7: "Logout"}}
+                            4: "Find Chat Rooms", 5: "Join a Chat Room", 6: "One to One chat", 7: "Logout"}}
         # as long as the user is not logged out, asks to select an option in the menu
         while True:
             # menu selection prompt
@@ -214,16 +249,17 @@ class peerMain:
             username = input(Fore.MAGENTA + "username: ")
             password = input(Fore.MAGENTA + "password: ")
             # asks for the port number for server's tcp socket
-            peer_server_port = int(input(Fore.MAGENTA + "Enter a port number for peer server: "))
 
-            status = self.login(username, password, peer_server_port)
+            status = self.login(username, password)
             # is user logs in successfully, peer variables are set
             if status == 1:
                 self.isOnline = True
                 self.loginCredentials = (username, password)
-                self.peerServerPort = peer_server_port
                 # hello message is sent to registry
                 self.sendKeepAliveMessage(self.loginCredentials[0])
+                search_status = self.search_user(username, False).split(":")
+                self.peerServer = PeerServer(self.loginCredentials[0], search_status[0], int(search_status[1]))
+                self.peerServer.start()
                 self.state = 2
 
         elif selection == "Logout":
@@ -311,6 +347,26 @@ class peerMain:
 
         elif selection == "show room peers":
             self.getRoomPeers()
+
+        elif selection == "One to One chat":
+            username = input(Fore.MAGENTA + "Username to chat with: ")
+            search_status = self.search_user(username, False)
+            # if searched user is found, then its port number is retrieved and a client thread is created
+            if search_status and search_status != 0:
+                search_status = search_status.split(":")
+                if self.peerClient is None:
+                    self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer,
+                                                 None, search_status[0], int(search_status[1]),
+                                                 username)
+                    self.peerClient.start()
+                    self.peerClient.join()
+                else:
+                    self.peerClient.setup_private_chat(search_status[0], int(search_status[1]), username)
+                self.peerServer.one_to_one_session = True
+                # Loop in the chatting until user exits
+                self.peerClient.chat()
+                self.peerServer.one_to_one_session = False
+
         # if choice is cancel timer for hello message is cancelled
         elif choice == "CANCEL":
             self.timer.cancel()
@@ -344,10 +400,10 @@ class peerMain:
         return response.split()
 
     # login function
-    def login(self, username, password, peerServerPort):
+    def login(self, username, password):
         # a login message is composed and sent to registry
         # an integer is returned according to each response
-        message = "LOGIN " + username + " " + utility.hash_password(password) + " " + str(peerServerPort)
+        message = "LOGIN " + username + " " + utility.hash_password(password)
         response = self.send_credentials(message)
         if response[2] == "<200>":
             print(Fore.GREEN + "Logged in successfully...")
@@ -512,16 +568,17 @@ class peerMain:
         # if searched user is found, then its port number is retrieved and a client thread is created
         if search_status and search_status != 0:
             search_status = search_status.split(":")
-            # creates the server thread for this peer, and runs it
-            self.peerServer = PeerServer(self.loginCredentials[0], int(search_status[1]))
-            self.peerServer.start()
+            # configure server thread to receive messages from the chatroom
+            self.peerServer.multicast_port = int(search_status[1])
+            self.peerServer.group_session = True
             self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer,
-                                         self.chatroom)
+                                         self.chatroom, None, None, None)
             self.peerClient.start()
             self.peerClient.join()
             # Loop in the chatting until user exits
             self.peerClient.group_chat()
             # Exit from chatroom
+            self.peerServer.group_session = False
             self.exitChatroom(self.loginCredentials[0])
 
     def getRoomPeers(self):
