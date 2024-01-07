@@ -53,7 +53,7 @@ class DB:
     def user_logout(self, username):
         user = self.db.online_peers.find_one({"username": username})
         if user:
-            chatroom = self.db.online_peers.find_one({"username": username})["chatroom"]
+            chatroom = user["chatroom"]
             if chatroom:
                 self.remove_peer_from_chatroom(username, chatroom)
             self.db.online_peers.delete_one({"username": username})
