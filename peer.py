@@ -291,10 +291,10 @@ class peerMain:
                 self.logout(1)
                 self.isOnline = False
                 self.loginCredentials = (None, None)
-                if self.peerServer is not None:
+                if self.peerServer is not None and self.peerServer.udp_socket is not None:
                     self.peerServer.isOnline = False
                     self.peerServer.udp_socket.close()
-                if self.peerClient is not None:
+                if self.peerClient is not None and self.peerClient.udp_socket is not None:
                     self.peerClient.udp_socket.close()
                 print(Fore.GREEN + "Logged out successfully")
                 self.tcpClientSocket.close()

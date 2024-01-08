@@ -1,8 +1,3 @@
-"""
-    ## Credits for the starting code
-    ##  150114822 - Eren Ulaş
-"""
-
 from socket import *
 import threading
 import select
