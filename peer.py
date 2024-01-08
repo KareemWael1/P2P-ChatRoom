@@ -73,7 +73,14 @@ class PeerServer(threading.Thread):
                 data, address = self.private_udp_socket.recvfrom(1024)
                 # Process the received private message as needed
                 if self.one_to_one_session:
-                    print(Fore.BLUE + data.decode())
+                    data = self.format_message(data.decode())
+                    sender = data.split(':')[0]
+                    if sender == "System" and data[-1] == '.':
+                        print(Fore.YELLOW + data)
+                    elif sender == "System" and data[-1] == '!':
+                        print(Fore.GREEN + data)
+                    elif sender != self.username:
+                        print(Fore.BLUE + data)
                 else:
                     print(Fore.LIGHTMAGENTA_EX + "\nNotification: Received a private massage from " +
                           str(address) + " " + data.decode())
@@ -106,28 +113,36 @@ class PeerClient(threading.Thread):
         self.peerServer = peerServer
         # keeps the username of the peer
         self.chatroom_name = chatroom_name
-        # Create a UDP socket for multicast
-        self.udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-        # Allow multiple sockets to use the same port
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        # UDP socket for multicast
+        self.udp_socket = None
         # Multicast address and port
         self.multicast_group = '224.1.1.1'
         self.multicast_port = port
+        self.group_session = False
         # One-to-One
         self.target_ip = target_ip
         self.target_port = target_port
         self.target_username = target_username
         self.private_udp_socket = socket(AF_INET, SOCK_DGRAM)
+        self.one_to_one_session = False
 
     # main method of the peer client thread
     def run(self):
+        if self.one_to_one_session:
+            self.chat()
+        elif self.group_session:
+            self.group_chat()
+
+    def group_chat(self):
+        # Create a UDP socket for multicast
+        self.udp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+        # Allow multiple sockets to use the same port
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         # Bind the socket to the multicast address and port
         self.udp_socket.bind(('', self.multicast_port))
-
         # Set the IP_MULTICAST_TTL option (time-to-live for packets)
         self.udp_socket.setsockopt(IPPROTO_IP, IP_MULTICAST_TTL, struct.pack('b', 1))
 
-    def group_chat(self):
         message = "System: User " + self.username + " joined!"
         self.udp_socket.sendto(message.encode(), (self.multicast_group, self.multicast_port))
         print(Fore.RESET + "Welcome to Chatroom " + self.chatroom_name)
@@ -141,6 +156,7 @@ class PeerClient(threading.Thread):
                     time.sleep(0.1)
                     self.udp_socket.sendto(message.encode(), (self.multicast_group, self.multicast_port))
                     self.udp_socket.close()
+                    self.group_session = False
                     return
                 message = self.username + ": " + message
                 self.udp_socket.sendto(message.encode(), (self.multicast_group, self.multicast_port))
@@ -158,10 +174,10 @@ class PeerClient(threading.Thread):
                 message = input()
                 if message == 'q':
                     message = "System: User " + self.username + " left."
-                    self.peerServer.private_udp_socket.close()
                     time.sleep(0.1)
                     self.private_udp_socket.sendto(message.encode(), (self.target_ip, self.target_port))
                     self.private_udp_socket.close()
+                    self.one_to_one_session = False
                     return
                 message = self.username + ": " + message
                 self.private_udp_socket.sendto(message.encode(), (self.target_ip, self.target_port))
@@ -176,6 +192,12 @@ class PeerClient(threading.Thread):
         self.target_ip = target_ip
         self.target_port = target_port
         self.target_username = target_username
+        self.one_to_one_session = True
+
+    def setup_group_chat(self, multicast_port, chatroom_name):
+        self.multicast_port = multicast_port
+        self.chatroom_name = chatroom_name
+        self.group_session = True
 
 
 # main process of the peer
@@ -354,18 +376,18 @@ class peerMain:
             # if searched user is found, then its port number is retrieved and a client thread is created
             if search_status and search_status != 0:
                 search_status = search_status.split(":")
-                if self.peerClient is None:
-                    self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer,
-                                                 None, search_status[0], int(search_status[1]),
-                                                 username)
-                    self.peerClient.start()
-                    self.peerClient.join()
-                else:
-                    self.peerClient.setup_private_chat(search_status[0], int(search_status[1]), username)
+                self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer
+                                             , None, search_status[0], int(search_status[1]), username)
+                self.peerClient.one_to_one_session = True
                 self.peerServer.one_to_one_session = True
-                # Loop in the chatting until user exits
-                self.peerClient.chat()
+                self.peerClient.start()
+                self.peerClient.join()
                 self.peerServer.one_to_one_session = False
+                self.peerClient.one_to_one_session = False
+            else:
+                print(Fore.RED + "No online user with username " + username + " right now.")
+                print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
+                time.sleep(1)
 
         # if choice is cancel timer for hello message is cancelled
         elif choice == "CANCEL":
@@ -592,10 +614,10 @@ class peerMain:
         if status_code == "<200>":
             # Assuming peers are present in the response starting from index 3
             list_start_index = response.find("<200>") + len("<200>")
-            peerlist_list_str = response[list_start_index:].strip()
+            peer_list_str = response[list_start_index:].strip()
 
             # Split the string into a list
-            room_peers = peerlist_list_str.split()
+            room_peers = peer_list_str.split()
 
             # Print the chatrooms list
 
