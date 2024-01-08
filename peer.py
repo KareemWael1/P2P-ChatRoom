@@ -21,6 +21,7 @@ class PeerServer(threading.Thread):
         self.multicast_group = '224.1.1.1'
         self.multicast_port = None
         self.group_session = False
+        self.exit = False
         # One to One chatting
         self.private_udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.private_udp_socket.bind((peerServerIP, peerServerPort))
@@ -33,6 +34,8 @@ class PeerServer(threading.Thread):
         while True:
             if self.group_session:
                 self.receive_group_messages()
+            elif self.exit:
+                break
 
     def receive_group_messages(self):
         # Create a UDP socket for receiving multicast data
@@ -61,6 +64,8 @@ class PeerServer(threading.Thread):
         # handles the exceptions, and logs them
         except OSError as oErr:
             logging.error("OSError: {0}".format(oErr))
+        except WindowsError as werr:
+            logging.error("WinError: {0}".format(werr))
         except ValueError as vErr:
             logging.error("ValueError: {0}".format(vErr))
         finally:
@@ -256,7 +261,11 @@ class peerMain:
             for option_number, option_name in self.options[self.state].items():
                 print("\t" + str(option_number) + " : " + option_name)
             choice = input(Fore.MAGENTA + "\nChoice: ")
-            self.handle_user_request(choice)
+            try:
+                self.handle_user_request(choice)
+            except WindowsError as e:
+                print(e)
+                logging.error(e)
 
     def handle_user_request(self, choice):
         selection = self.options[self.state][int(choice)]
@@ -291,9 +300,11 @@ class peerMain:
                 self.logout(1)
                 self.isOnline = False
                 self.loginCredentials = (None, None)
-                if self.peerServer is not None and self.peerServer.udp_socket is not None:
-                    self.peerServer.isOnline = False
-                    self.peerServer.udp_socket.close()
+                if self.peerServer is not None:
+                    self.peerServer.exit = True
+                    self.peerServer.private_udp_socket.close()
+                    if self.peerServer.udp_socket is not None:
+                        self.peerServer.udp_socket.close()
                 if self.peerClient is not None and self.peerClient.udp_socket is not None:
                     self.peerClient.udp_socket.close()
                 print(Fore.GREEN + "Logged out successfully")
