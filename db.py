@@ -14,7 +14,7 @@ class DB:
         cursor = self.db.accounts.find({'username': username})
         doc_count = 0
 
-        for document in cursor:
+        for _ in cursor:
             doc_count += 1
 
         if doc_count > 0:

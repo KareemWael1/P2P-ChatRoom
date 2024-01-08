@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import MagicMock
 
-from peer import peerMain
+from peer import PeerUI
 
 
 class MyTestCase(unittest.TestCase):
     def test_search_user(self):
         # Create an instance of the class
-        mySearchUserObj = peerMain()
+        mySearchUserObj = PeerUI()
 
         # Set up mock objects for testing
         mySearchUserObj.registryName = "registry.com"

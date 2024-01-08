@@ -121,11 +121,9 @@ class ClientThread(threading.Thread):
                         finally:
                             self.lock.release()
                         print(Fore.BLUE + self.ip + ":" + str(self.port) + " is logged out")
-                        self.tcpClientSocket.close()
                         self.udpServer.timer.cancel()
                         break
                     else:
-                        self.tcpClientSocket.close()
                         break
 
                 #   SEARCH  #

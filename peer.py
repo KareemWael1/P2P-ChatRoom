@@ -6,6 +6,7 @@ from socket import *
 import ssl
 from colorama import Fore
 import utility
+from utility import format_message
 
 
 # Server side of peer
@@ -50,14 +51,7 @@ class PeerServer(threading.Thread):
             # Receive data
             while True:
                 data, address = self.udp_socket.recvfrom(1024)
-                data = self.format_message(data.decode())
-                sender = data.split(':')[0]
-                if sender == "System" and data[-1] == '.':
-                    print(Fore.YELLOW + data)
-                elif sender == "System" and data[-1] == '!':
-                    print(Fore.GREEN + data)
-                elif sender != self.username:
-                    print(Fore.BLUE + data)
+                self.output_data(data.decode())
         # handles the exceptions, and logs them
         except OSError as oErr:
             logging.error("OSError: {0}".format(oErr))
@@ -67,39 +61,29 @@ class PeerServer(threading.Thread):
             # Close the socket when done
             self.udp_socket.close()
 
+    def output_data(self, data):
+        data = format_message(data)
+        sender = data.split(':')[0]
+        if sender == "System" and data[-1] == '.':
+            print(Fore.YELLOW + data)
+        elif sender == "System" and data[-1] == '!':
+            print(Fore.GREEN + data)
+        elif sender != self.username:
+            print(Fore.BLUE + data)
+
     def receive_private_messages(self):
         try:
             while True:
                 data, address = self.private_udp_socket.recvfrom(1024)
+                data = data.decode()
                 # Process the received private message as needed
                 if self.one_to_one_session:
-                    data = self.format_message(data.decode())
-                    sender = data.split(':')[0]
-                    if sender == "System" and data[-1] == '.':
-                        print(Fore.YELLOW + data)
-                    elif sender == "System" and data[-1] == '!':
-                        print(Fore.GREEN + data)
-                    elif sender != self.username:
-                        print(Fore.BLUE + data)
-                else:
+                    self.output_data(data)
+                elif not data.split(':')[0] == "System":
                     print(Fore.LIGHTMAGENTA_EX + "\nNotification: Received a private massage from " +
-                          str(address) + " " + data.decode())
+                          str(address) + " " + data)
         except Exception as e:
             logging.error(e)
-    def format_message(self, message):
-        # Format italic text (~italic~)
-        message = message.replace('~', '\033[3m', 1)
-        message = message[::-1].replace('~', 'm32[\033', 1)[::-1]
-
-        # Format bold text (*bold*)
-        message = message.replace('*', '\033[1m', 1)
-        message = message[::-1].replace('*', 'm22[\033', 1)[::-1]
-
-        # Format underline text (_underline_)
-        message = message.replace('_', '\033[4m', 1)
-        message = message[::-1].replace('_', 'm42[\033', 1)[::-1]
-
-        return message
 
 
 # Client side of peer
@@ -201,43 +185,14 @@ class PeerClient(threading.Thread):
 
 
 # main process of the peer
-class peerMain:
+class PeerUI:
 
     # peer initializations
     def __init__(self):
         # ip address of the registry
         self.registryName = input("Enter IP address of registry: ")
-        # self.registryName = 'localhost'
-        # port number of the registry
-        self.registryPort = 15600
-        # tcp socket connection to registry
-        self.tcpClientSocket = socket(AF_INET, SOCK_STREAM)
-        # Create an SSL context
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-        # Wrap the socket with SSL
-        self.tcpClientSocket = context.wrap_socket(self.tcpClientSocket, server_hostname=self.registryName)
-        # Connect to the server
-        self.tcpClientSocket.connect((self.registryName, self.registryPort))
-        self.connectServer()
-        # initializes udp socket which is used to send hello messages
-        self.udpClientSocket = socket(AF_INET, SOCK_DGRAM)
-        # udp port of the registry
-        self.registryUDPPort = 15500
-        # login info of the peer
-        self.loginCredentials = (None, None)
-        # online status of the peer
-        self.isOnline = False
-        # server port number of this peer
-        self.peerServerPort = None
-        # server of this peer
-        self.peerServer = None
-        # client of this peer
-        self.peerClient = None
-        # timer initialization
-        self.timer = None
-        self.chatroom = None
+        # Create an instance of the main peer class
+        self.main = PeerMain(self.registryName)
         # User Interface
         self.state = 0
         self.states = {1: "Welcome!", 2: "Main Menu"}
@@ -264,45 +219,39 @@ class peerMain:
             # Creates an account with the username and password entered by the user
             username = input(Fore.MAGENTA + "username: ")
             password = input(Fore.MAGENTA + "password: ")
-            self.createAccount(username, password)
+            signup_status = self.main.createAccount(username, password)
+            if signup_status == 1:
+                print(Fore.GREEN + "Account created successfully.")
+            elif signup_status == 2:
+                print(Fore.YELLOW + "Username already exists. Choose another username or login.")
+            elif signup_status == 3:
+                print(Fore.RED + "Failed to create an account. Please try again.")
+            time.sleep(1)
 
-        elif selection == "Login" and not self.isOnline:
+        elif selection == "Login":
             # Asks for the username and the password to login
             username = input(Fore.MAGENTA + "username: ")
             password = input(Fore.MAGENTA + "password: ")
-            # asks for the port number for server's tcp socket
 
-            status = self.login(username, password)
-            # is user logs in successfully, peer variables are set
+            status = self.main.login(username, password)
             if status == 1:
-                self.isOnline = True
-                self.loginCredentials = (username, password)
-                # hello message is sent to registry
-                self.sendKeepAliveMessage(self.loginCredentials[0])
-                search_status = self.search_user(username, False).split(":")
-                self.peerServer = PeerServer(self.loginCredentials[0], search_status[0], int(search_status[1]))
-                self.peerServer.start()
+                print(Fore.GREEN + "Logged in successfully...")
                 self.state = 2
+            elif status == 2:
+                print(Fore.YELLOW + "Account is already online...")
+            elif status == 3:
+                print(Fore.RED + "The username or password are wrong, please try again...")
+            time.sleep(0.5)
 
         elif selection == "Logout":
             # User is logged out and peer variables are set, and server and client sockets are closed
-            if self.isOnline:
-                self.logout(1)
-                self.isOnline = False
-                self.loginCredentials = (None, None)
-                if self.peerServer is not None:
-                    self.peerServer.isOnline = False
-                    self.peerServer.udp_socket.close()
-                if self.peerClient is not None:
-                    self.peerClient.udp_socket.close()
-                print(Fore.GREEN + "Logged out successfully")
-                self.tcpClientSocket.close()
-                exit(0)
+            self.main.logout(1)
+            print(Fore.GREEN + "Logged out successfully")
+            exit(0)
 
         elif selection == "Exit":
             # Exits the program:
-            self.logout(2)
-            self.tcpClientSocket.close()
+            self.main.logout(2)
             exit(0)
 
         elif selection == "Find Online Users":
@@ -310,30 +259,29 @@ class peerMain:
             while True:
                 option = input(Fore.MAGENTA + "Retrieve detailed list with users IP and Port numbers?(Choose y or n): ")
                 if option == 'Y' or option == 'y':
-                    self.find_online_user("DETAILED")
+                    self.main.find_online_user("DETAILED")
                     return
                 elif option == 'N' or option == 'n':
-                    self.find_online_user("SIMPLE")
+                    self.main.find_online_user("SIMPLE")
                     return
                 else:
                     print(Fore.RED + "Error: Please choose a valid option (y or n)\n")
 
         elif selection == "Search User":
-            # If user is online, then user is asked for a username that is wanted to be searched
-            if self.isOnline:
-                username = input(Fore.MAGENTA + "Username to be searched: ")
-                search_status = self.search_user(username)
-                # if user is found its ip address is shown to user
-                if search_status is not None and search_status != 0:
-                    print(Fore.GREEN + "IP address:Port number of " + username + " is " + search_status)
-                    time.sleep(1)
+            # The user is asked for a username that is wanted to be searched
+            username = input(Fore.MAGENTA + "Username to be searched: ")
+            search_status = self.main.search_user(username)
+            # if user is found its ip address is shown to user
+            if search_status is not None and search_status != 0:
+                print(Fore.GREEN + "IP address:Port number of " + username + " is " + str(search_status))
+                time.sleep(1)
 
         elif selection == "Create a Chat Room":
             while True:
                 name = input(Fore.MAGENTA + "Chat room name: ")
                 if name == 'quit':
                     break
-                elif self.createChatroom(name):
+                elif self.main.createChatroom(name):
                     break
                 else:
                     print(Fore.RED + "A Chatroom with name " + name + " already exists!")
@@ -341,7 +289,7 @@ class peerMain:
                     time.sleep(1)
 
         elif selection == "Find Chat Rooms":
-            chat_rooms = self.findChatRooms()
+            chat_rooms = self.main.findChatRooms()
             if len(chat_rooms) > 0:
                 number = 1
                 print(Fore.RESET + "#  Name".ljust(18) + "Host".ljust(15) + "Users in Chatroom")
@@ -360,7 +308,7 @@ class peerMain:
                 name = input(Fore.MAGENTA + "Chat room name: ")
                 if name == 'quit':
                     break
-                elif self.joinChatroom(name):
+                elif self.main.joinChatroom(name):
                     break
                 else:
                     print(Fore.RED + "No chatroom with the name " + name + "!")
@@ -368,32 +316,54 @@ class peerMain:
                     time.sleep(1)
 
         elif selection == "show room peers":
-            self.getRoomPeers()
+            self.main.getRoomPeers()
 
         elif selection == "One to One chat":
             username = input(Fore.MAGENTA + "Username to chat with: ")
-            search_status = self.search_user(username, False)
-            # if searched user is found, then its port number is retrieved and a client thread is created
-            if search_status and search_status != 0:
-                search_status = search_status.split(":")
-                self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer
-                                             , None, search_status[0], int(search_status[1]), username)
-                self.peerClient.one_to_one_session = True
-                self.peerServer.one_to_one_session = True
-                self.peerClient.start()
-                self.peerClient.join()
-                self.peerServer.one_to_one_session = False
-                self.peerClient.one_to_one_session = False
-            else:
+            if not self.main.create_private_chat(username):
                 print(Fore.RED + "No online user with username " + username + " right now.")
                 print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
                 time.sleep(1)
 
-        # if choice is cancel timer for hello message is cancelled
-        elif choice == "CANCEL":
-            self.timer.cancel()
         else:
             print(Fore.RED + "Invalid Option Selected, please try again.\n")
+
+
+class PeerMain:
+    def __init__(self, registryName):
+        self.registryName = registryName
+        # port number of the registry
+        self.registryPort = 15600
+        # Initialize SSL connection
+        self.tcpClientSocket = None
+        self.ssl_connection()
+        # initializes udp socket which is used to send hello messages
+        self.udpClientSocket = socket(AF_INET, SOCK_DGRAM)
+        # udp port of the registry
+        self.registryUDPPort = 15500
+        # login info of the peer
+        self.loginCredentials = (None, None)
+        # server of this peer
+        self.peerServer = None
+        # client of this peer
+        self.peerClient = None
+        # UDP Timer
+        self.timer = None
+        # Peer chatroom
+        self.chatroom = None
+
+    def ssl_connection(self):
+        # tcp socket connection to registry
+        self.tcpClientSocket = socket(AF_INET, SOCK_STREAM)
+        # Create an SSL context
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        # Wrap the socket with SSL
+        self.tcpClientSocket = context.wrap_socket(self.tcpClientSocket, server_hostname=self.registryName)
+        # Connect to the server
+        self.tcpClientSocket.connect((self.registryName, self.registryPort))
+        self.connectServer()
 
     # account creation function
     def createAccount(self, username, password):
@@ -403,16 +373,12 @@ class peerMain:
         message = "REGISTER " + username + " " + utility.hash_password(password)
         response = self.send_credentials(message)
         # Process the response from the registry
-
         if response[2] == "<200>":
-            print(Fore.GREEN + "Account created successfully.")
-            time.sleep(1)
+            return 1
         elif response[2] == "<300>":
-            print(Fore.YELLOW + "Username already exists. Choose another username or login.")
-            time.sleep(1)
+            return 2
         elif response[2] == "<404>":
-            print(Fore.RED + "Failed to create an account. Please try again.")
-            time.sleep(1)
+            return 3
 
     def send_credentials(self, message):
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
@@ -428,16 +394,17 @@ class peerMain:
         message = "LOGIN " + username + " " + utility.hash_password(password)
         response = self.send_credentials(message)
         if response[2] == "<200>":
-            print(Fore.GREEN + "Logged in successfully...")
-            time.sleep(1)
+            # User logs in successfully, peer variables are set
+            self.loginCredentials = (username, password)
+            # hello message is sent to registry
+            self.sendKeepAliveMessage(self.loginCredentials[0])
+            search_status = self.search_user(username, False).split(":")
+            self.peerServer = PeerServer(self.loginCredentials[0], search_status[0], int(search_status[1]))
+            self.peerServer.start()
             return 1
         elif response[2] == "<300>":
-            print(Fore.YELLOW + "Account is already online...")
-            time.sleep(1)
             return 2
         elif response[2] == "<404>":
-            print(Fore.RED + "Wrong password...")
-            time.sleep(1)
             return 3
 
     # logout function
@@ -445,12 +412,21 @@ class peerMain:
         # a logout message is composed and sent to registry
         # timer is stopped
         if option == 1:
-            message = "LOGOUT " + self.loginCredentials[0]
+            message = "LOGOUT " + str(self.loginCredentials[0])
             self.timer.cancel()
         else:
             message = "LOGOUT"
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
+        try:
+            self.tcpClientSocket.send(message.encode())
+            self.tcpClientSocket.close()
+        except Exception as e:
+            pass
+        self.loginCredentials = (None, None)
+        if self.peerServer is not None and self.peerServer.udp_socket is not None:
+            self.peerServer.udp_socket.close()
+        if self.peerClient is not None and self.peerClient.udp_socket is not None:
+            self.peerClient.udp_socket.close()
 
     # function for searching an online user
     def search_user(self, username, output=True):
@@ -458,10 +434,7 @@ class peerMain:
         # custom value is returned according to each response
         # to this search message
         message = "SEARCH_USER " + username
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode().split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        response = self.exchange_messages(message)
         if response[2] == "<200>":
             if output:
                 print(Fore.GREEN + username + " is found successfully...")
@@ -478,12 +451,16 @@ class peerMain:
                 time.sleep(1)
             return None
 
-    def find_online_user(self, option):
-        message = "DISCOVER_PEERS " + option + " " + self.loginCredentials[0]
+    def exchange_messages(self, message):
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        return response
+
+    def find_online_user(self, option):
+        message = "DISCOVER_PEERS " + option + " " + str(self.loginCredentials[0])
+        response = self.exchange_messages(message)
         if response[2] == "<200>":
             response = response[3:]
             number = 1
@@ -508,29 +485,20 @@ class peerMain:
         message = "KEEP_ALIVE " + username
         logging.info("Send to " + self.registryName + ":" + str(self.registryUDPPort) + " -> " + message)
         self.udpClientSocket.sendto(message.encode(), (self.registryName, self.registryUDPPort))
-
-        # Assuming you expect a response from the registry
-
         # Schedule the next hello message
         self.timer = threading.Timer(1, self.sendKeepAliveMessage, args=[username])
         self.timer.start()
 
     def connectServer(self):
         starting_message = "HELLO_P2P"
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + starting_message)
-        self.tcpClientSocket.send(starting_message.encode())
-        response = self.tcpClientSocket.recv(1024).decode().split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        response = self.exchange_messages(starting_message)
         status_code = int(response[2])
         if status_code == "<200>":
             print(Fore.GREEN + "Connected to the registry...")
 
     def createChatroom(self, name):
-        message = "CREATE-CHAT-ROOM " + name + " " + self.loginCredentials[0]
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode().split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        message = "CREATE-CHAT-ROOM " + name + " " + str(self.loginCredentials[0])
+        response = self.exchange_messages(message)
         status_code = response[2]
         if status_code == "<200>":
             self.chatroom = name
@@ -542,11 +510,8 @@ class peerMain:
             return False
 
     def joinChatroom(self, name):
-        message = "JOIN-CHAT-ROOM " + name + " " + self.loginCredentials[0]
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode().split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        message = "JOIN-CHAT-ROOM " + name + " " + str(self.loginCredentials[0])
+        response = self.exchange_messages(message)
         status_code = response[2]
         if status_code == "<200>":
             print(Fore.GREEN + "You have joined the room " + name + " successfully...\n")
@@ -559,11 +524,9 @@ class peerMain:
     def findChatRooms(self):
         chatrooms_list = []
         message = "SHOW-ROOM-LIST"
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
-        status_code = response.split()[2]
+        response = self.exchange_messages(message)
+        status_code = response[2]
+        response = ' '.join(response)
         if status_code == "<200>":
             # Extract the list part from the received message
             list_start_index = response.find("<200>") + len("<200>")
@@ -576,10 +539,7 @@ class peerMain:
 
     def exitChatroom(self, username):
         message = "ROOM-EXIT " + username + " " + self.chatroom
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode().split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        response = self.exchange_messages(message)
         status_code = response[2]
         if status_code == "<200>":
             return True
@@ -606,11 +566,8 @@ class peerMain:
     def getRoomPeers(self):
         room_peers = []
         message = "DISCOVER-ROOM-PEERS " + self.chatroom
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
-        status_code = response.split()[2]
+        response = ' '.join(self.exchange_messages(message))
+        status_code = response[2]
         if status_code == "<200>":
             # Assuming peers are present in the response starting from index 3
             list_start_index = response.find("<200>") + len("<200>")
@@ -625,8 +582,24 @@ class peerMain:
             return list(room_peers)
         return room_peers
 
+    def create_private_chat(self, username):
+        search_status = self.search_user(username, False)
+        # if searched user is found, then its port number is retrieved and a client thread is created
+        if search_status and search_status != 0:
+            search_status = search_status.split(":")
+            self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer,
+                                         None, search_status[0], int(search_status[1]), username)
+            self.peerClient.one_to_one_session = True
+            self.peerServer.one_to_one_session = True
+            self.peerClient.start()
+            self.peerClient.join()
+            self.peerServer.one_to_one_session = False
+            self.peerClient.one_to_one_session = False
+            return True
+        return False
+
 
 # log file initialization
 logging.basicConfig(filename="logs/peer.log", level=logging.INFO)
 # peer is started
-main = peerMain()
+main = PeerUI()
