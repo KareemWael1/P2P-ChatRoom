@@ -86,6 +86,7 @@ class PeerServer(threading.Thread):
                           str(address) + " " + data.decode())
         except Exception as e:
             logging.error(e)
+
     def format_message(self, message):
         # Format italic text (~italic~)
         message = message.replace('~', '\033[3m', 1)
@@ -326,7 +327,7 @@ class peerMain:
                 # if user is found its ip address is shown to user
                 if search_status is not None and search_status != 0:
                     print(Fore.GREEN + "IP address:Port number of " + username + " is " + search_status)
-                    time.sleep(1)
+                    time.sleep(0.5)
 
         elif selection == "Create a Chat Room":
             while True:
@@ -338,7 +339,7 @@ class peerMain:
                 else:
                     print(Fore.RED + "A Chatroom with name " + name + " already exists!")
                     print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
-                    time.sleep(1)
+                    time.sleep(0.5)
 
         elif selection == "Find Chat Rooms":
             chat_rooms = self.findChatRooms()
@@ -353,7 +354,7 @@ class peerMain:
                     number += 1
             else:
                 print(Fore.YELLOW + "No available Chat Rooms")
-                time.sleep(1)
+                time.sleep(0.5)
 
         elif selection == "Join a Chat Room":
             while True:
@@ -365,7 +366,7 @@ class peerMain:
                 else:
                     print(Fore.RED + "No chatroom with the name " + name + "!")
                     print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
-                    time.sleep(1)
+                    time.sleep(0.5)
 
         elif selection == "show room peers":
             self.getRoomPeers()
@@ -376,8 +377,8 @@ class peerMain:
             # if searched user is found, then its port number is retrieved and a client thread is created
             if search_status and search_status != 0:
                 search_status = search_status.split(":")
-                self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer
-                                             , None, search_status[0], int(search_status[1]), username)
+                self.peerClient = PeerClient(int(search_status[1]), self.loginCredentials[0], self.peerServer,
+                                             None, search_status[0], int(search_status[1]), username)
                 self.peerClient.one_to_one_session = True
                 self.peerServer.one_to_one_session = True
                 self.peerClient.start()
@@ -387,7 +388,7 @@ class peerMain:
             else:
                 print(Fore.RED + "No online user with username " + username + " right now.")
                 print(Fore.LIGHTGREEN_EX + "Hint: enter quit to return to main menu")
-                time.sleep(1)
+                time.sleep(0.5)
 
         # if choice is cancel timer for hello message is cancelled
         elif choice == "CANCEL":
@@ -406,13 +407,13 @@ class peerMain:
 
         if response[2] == "<200>":
             print(Fore.GREEN + "Account created successfully.")
-            time.sleep(1)
+            time.sleep(0.5)
         elif response[2] == "<300>":
             print(Fore.YELLOW + "Username already exists. Choose another username or login.")
-            time.sleep(1)
+            time.sleep(0.5)
         elif response[2] == "<404>":
             print(Fore.RED + "Failed to create an account. Please try again.")
-            time.sleep(1)
+            time.sleep(0.5)
 
     def send_credentials(self, message):
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
@@ -429,15 +430,15 @@ class peerMain:
         response = self.send_credentials(message)
         if response[2] == "<200>":
             print(Fore.GREEN + "Logged in successfully...")
-            time.sleep(1)
+            time.sleep(0.5)
             return 1
         elif response[2] == "<300>":
             print(Fore.YELLOW + "Account is already online...")
-            time.sleep(1)
+            time.sleep(0.5)
             return 2
         elif response[2] == "<404>":
             print(Fore.RED + "Wrong password...")
-            time.sleep(1)
+            time.sleep(0.5)
             return 3
 
     # logout function
@@ -465,17 +466,17 @@ class peerMain:
         if response[2] == "<200>":
             if output:
                 print(Fore.GREEN + username + " is found successfully...")
-                time.sleep(1)
+                time.sleep(0.5)
             return response[3]
         elif response[2] == "<300>":
             if output:
                 print(Fore.YELLOW + username + " is not online...")
-                time.sleep(1)
+                time.sleep(0.5)
             return 0
         elif response[2] == "<404>":
             if output:
                 print(Fore.RED + username + " is not found")
-                time.sleep(1)
+                time.sleep(0.5)
             return None
 
     def find_online_user(self, option):
@@ -497,10 +498,10 @@ class peerMain:
                 for username in response:
                     print(Fore.GREEN + str(number) + "  " + username)
                     number += 1
-            time.sleep(1)
+            time.sleep(0.5)
         elif response[2] == "<404>":
             print(Fore.YELLOW + "No Online Users right now, please check back later")
-            time.sleep(1)
+            time.sleep(0.5)
 
     # function for sending hello message
     # a timer thread is used to send hello messages to udp socket of registry
@@ -535,7 +536,7 @@ class peerMain:
         if status_code == "<200>":
             self.chatroom = name
             print(Fore.GREEN + "A chatroom with name " + name + " has been created...\n")
-            time.sleep(1)
+            time.sleep(0.5)
             self.connect_to_chatroom(self.loginCredentials[0])
             return True
         else:
